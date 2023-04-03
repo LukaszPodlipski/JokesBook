@@ -36,17 +36,23 @@ To run tests, run the following command
 To run this project, you will need to add the following environment variables to your .env file
 
 ``
-
+DATABASE_NAME=postgres
+DATABASE_USERNAME=username
+DATABASE_PASSWORD=password
 ``
 
 ## Documentation
 
 ./app.js - main file
 
-./db.js - database instace
+./database/index.js - database instace
 
-./seed.js - seeding entry data to database
+./database/associations.js - tables associations
 
-./models/ - database models
+./database/seed/index.js - seeding entry data to database
 
-./seedData/ - data to seed in csv files
+./database/seed/data/ - data to seed in csv files
+
+./database/models/ - database models
+
+./database/entities/ - data models
