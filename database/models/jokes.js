@@ -19,6 +19,14 @@ const Jokes = sequelize.define('jokes', {
     type: DataTypes.TEXT,
     allowNull: false,
   },
+  categoryId: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    references: {
+      model: 'categories',
+      key: 'id'
+    }
+  },
   ratings: {
     type: DataTypes.ARRAY(DataTypes.INTEGER),
     allowNull: true,

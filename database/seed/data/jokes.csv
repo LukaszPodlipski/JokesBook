@@ -1,4 +1,4 @@
-id,userId,content,ratings
-1,1,zart1,
-2,2,zart2,
-3,3,zart3,
+id,userId,content,ratings,categoryId
+1,1,zart1,"",1
+2,2,zart2,"",1
+3,3,zart3,"",2
