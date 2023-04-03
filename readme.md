@@ -35,14 +35,13 @@ To run tests, run the following command
 
 To run this project, you will need to add the following environment variables to your .env file
 
-``
+
 DATABASE_NAME=postgres
 
 DATABASE_USERNAME=username
 
 DATABASE_PASSWORD=password
 
-``
 
 ## Documentation
 
