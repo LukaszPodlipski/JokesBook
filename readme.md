@@ -37,7 +37,9 @@ To run this project, you will need to add the following environment variables to
 
 ``
 DATABASE_NAME=postgres
+
 DATABASE_USERNAME=username
+
 DATABASE_PASSWORD=password
 ``
 
