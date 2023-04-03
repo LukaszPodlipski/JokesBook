@@ -1,63 +1,41 @@
 const fs = require('fs');
 const csv = require('csv-parser');
 const { Users, Jokes, Categories } = require('../associations');
+const { User, Category, Joke } = require('../entities/index');
 
-async function seedUsers() {
-  fs.createReadStream('./database/seed/data/users.csv')
+const seeds = [
+  {
+    model: Categories,
+    data: './database/seed/data/categories.csv',
+    dataModel: (row) => new Category(row),
+  },
+  {
+    model: Users,
+    data: './database/seed/data/users.csv',
+    dataModel: (row) => new User(row),
+  },
+  {
+    model: Jokes,
+    data: './database/seed/data/jokes.csv',
+    dataModel: (row) => new Joke(row),
+  },
+]
+
+async function seedData(seed){
+  fs.createReadStream(seed.data)
     .pipe(csv())
     .on('data', (row) => {
-      const newUser = {
-        id: row.id,
-        email: row.email,
-        password: row.password,
-        name: row.name,
-      };
-      Users.create(newUser);
+      seed.model.create(seed.dataModel(row));
     })
     .on('end', () => {
-      console.log('Users file successfully processed');
-    });
-}
-
-async function seedJokes() {
-  fs.createReadStream('./database/seed/data/jokes.csv')
-    .pipe(csv())
-    .on('data', (row) => {
-      const newJoke = {
-        id: row.id,
-        userId: row.userId,
-        content: row.content,
-        ratings: row?.ratings || [],
-        categoryId: row?.categoryId|| [],
-      };
-      Jokes.create(newJoke);
-    })
-    .on('end', () => {
-      console.log('Jokes file successfully processed');
-    });
-}
-
-async function seedCategories() {
-  fs.createReadStream('./database/seed/data/categories.csv')
-    .pipe(csv())
-    .on('data', (row) => {
-      const newCategory = {
-        id: row.id,
-        name: row.name,
-      };
-      Categories.create(newCategory);
-    })
-    .on('end', () => {
-      console.log('Categories file successfully processed');
+      console.log(`${seed.model} file successfully processed`);
     });
 }
 
 async function seed() {
-  await Promise.all([
-    seedCategories(),
-    seedUsers(),
-    seedJokes(),
-  ]);
+  for (const seed of seeds) {
+    await seedData(seed);
+  }
 }
 
 module.exports = seed;
