@@ -41,6 +41,7 @@ DATABASE_NAME=postgres
 DATABASE_USERNAME=username
 
 DATABASE_PASSWORD=password
+
 ``
 
 ## Documentation
