@@ -1,6 +1,6 @@
 const express = require('express');
-const sequelize = require('./db');
-const seed = require('./seed');
+const sequelize = require('./database/index');
+const seed = require('./database/seed/index');
 
 // const User = require('./models/user'); // przykładowy import modelu usera
 
