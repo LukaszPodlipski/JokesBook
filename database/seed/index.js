@@ -1,24 +1,33 @@
 const fs = require('fs');
 const csv = require('csv-parser');
-const { Users, Jokes, Categories } = require('../associations');
-const { User, Category, Joke } = require('../entities/index');
+const { Users, Jokes, Categories, Comments } = require('../associations');
+const { User, Category, Joke, Comment } = require('../entities/index');
 
 const seeds = [
   {
+    name: 'categories',
     model: Categories,
     data: './database/seed/data/categories.csv',
     dataModel: (row) => new Category(row),
   },
   {
+    name: 'users',
     model: Users,
     data: './database/seed/data/users.csv',
     dataModel: (row) => new User(row),
   },
   {
+    name: 'jokes',
     model: Jokes,
     data: './database/seed/data/jokes.csv',
     dataModel: (row) => new Joke(row),
   },
+  {
+    name: 'comments',
+    model: Comments,
+    data: './database/seed/data/comments.csv',
+    dataModel: (row) => new Comment(row),
+  }
 ]
 
 async function seedData(seed){
@@ -28,7 +37,7 @@ async function seedData(seed){
       seed.model.create(seed.dataModel(row));
     })
     .on('end', () => {
-      console.log(`${seed.model} file successfully processed`);
+      console.log(`${seed.name} file successfully processed`);
     });
 }
 

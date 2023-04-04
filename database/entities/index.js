@@ -24,4 +24,13 @@ class Joke {
     }
 }
 
-module.exports = { User, Category, Joke };
+class Comment{
+    constructor(data){
+        this.id = data.id;
+        this.userId = data?.userId;
+        this.content = data?.content;
+        this.jokeId = data?.jokeId;
+    }
+}
+
+module.exports = { User, Category, Joke, Comment };
