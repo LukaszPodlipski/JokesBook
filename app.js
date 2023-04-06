@@ -1,13 +1,14 @@
 const express = require('express');
 const sequelize = require('./database/index');
-const seed = require('./database/seed/index');
+const seedDatabase = require('./database/seed/index');
 
 // const User = require('./models/user'); // przykładowy import modelu usera
 
 const app = express();
+
 sequelize.sync().then(() => {
   console.log('Database connected');
-  seed()// seed the database with users
+  seedDatabase()// seed the database with users
 });;
 
 app.get('/', (req, res) => {

@@ -30,7 +30,7 @@ const seeds = [
   }
 ]
 
-async function seedData(seed){
+async function seedModel(seed){
   fs.createReadStream(seed.data)
     .pipe(csv())
     .on('data', (row) => {
@@ -41,10 +41,10 @@ async function seedData(seed){
     });
 }
 
-async function seed() {
+async function seedDatabase() {
   for (const seed of seeds) {
-    await seedData(seed);
+    await seedModel(seed);
   }
 }
 
-module.exports = seed;
+module.exports = seedDatabase;
