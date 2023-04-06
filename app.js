@@ -1,20 +1,19 @@
 const express = require('express');
 const sequelize = require('./database/index');
-const seedDatabase = require('./database/seed/index');
+const { seedDatabase, dropDatabase } = require('./database/seed/index');
 
 // const User = require('./models/user'); // przykładowy import modelu usera
 
 const app = express();
 
-sequelize.sync().then(() => {
-  console.log('Database connected');
-  seedDatabase()// seed the database with users
-});;
 
 app.get('/', (req, res) => {
   res.send('Hello World!');
 });
 
-app.listen(3000, () => {
+app.listen(3000, async () => {
   console.log('Example app listening on port 3000!');
+  await dropDatabase();
+  await sequelize.sync();
+  await seedDatabase();
 });

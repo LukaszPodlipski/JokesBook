@@ -2,6 +2,7 @@ const fs = require('fs');
 const csv = require('csv-parser');
 const { Users, Jokes, Categories, Comments } = require('../associations');
 const { User, Category, Joke, Comment } = require('../entities/index');
+const sequelize = require('../index');
 
 const seeds = [
   {
@@ -47,4 +48,14 @@ async function seedDatabase() {
   }
 }
 
-module.exports = seedDatabase;
+const dropDatabase = async () => {
+  try {
+    await sequelize.query('DROP SCHEMA public CASCADE;');
+    await sequelize.query('CREATE SCHEMA public;');
+    console.log('Schema dropped and created successfully');
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+module.exports = { seedDatabase, dropDatabase };
