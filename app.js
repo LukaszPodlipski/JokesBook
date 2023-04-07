@@ -2,14 +2,11 @@ const express = require('express');
 const sequelize = require('./database/index');
 const { seedDatabase, dropDatabase } = require('./database/seed/index');
 
-// const User = require('./models/user'); // przykładowy import modelu usera
+const jokesRouter = require('./routes/jokesRouter');
 
 const app = express();
 
 
-app.get('/', (req, res) => {
-  res.send('Hello World!');
-});
 
 app.listen(3000, async () => {
   console.log('Example app listening on port 3000!');
@@ -17,3 +14,9 @@ app.listen(3000, async () => {
   await sequelize.sync();
   await seedDatabase();
 });
+
+app.get('/', (req, res) => {
+  res.send('Hello World!');
+});
+
+app.use('/jokes', jokesRouter);
