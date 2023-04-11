@@ -1,0 +1,28 @@
+const jwt = require('jsonwebtoken');
+const secretKey = process.env.SECRET_KEY;
+const users = require('../database/models/users');
+
+
+// Login controller
+const login = async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    const user = await users.findOne({ where: { email } }); 
+
+    if (!user || user.password !== password) {
+      return res.status(401).json({ message: 'Invalid email or password' });
+    }
+
+    // Generate JWT token
+    const token = jwt.sign({ id: user.id, email: user.email }, secretKey, { expiresIn: '1h' });
+
+    // Return token as response
+    res.json({ token });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+module.exports = { login };
