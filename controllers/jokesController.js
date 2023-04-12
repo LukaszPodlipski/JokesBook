@@ -41,6 +41,42 @@ const getSpecificJoke = async (req, res) => {
   }
 };
 
+const deleteSpecificJoke = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const joke = await Jokes.findOne({ where: { id } });
+    if (joke) {
+      await Jokes.destroy({ where: { id } });
+      res.status(200).json({ message: 'Joke deleted succesfully' });
+    } else {
+      res.status(404).json({ message: 'Joke not found' });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+const updateSpecificJoke = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const joke = await Jokes.findOne({ where: { id } });
+    const data = req.body
+
+    if(!data.content && !data.categoryId){
+      res.status(400).json({ message: 'You should provide joke content or category' });
+    } else if (joke) {
+      await Jokes.update({ ...req.body }, { where: { id } });
+      res.status(200).json({ message: 'Joke updated succesfully' });
+    } else {
+      res.status(404).json({ message: 'Joke not found' });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
 const addJoke = async (req, res) => {
   try {
     const userId = req.user.id
@@ -53,4 +89,4 @@ const addJoke = async (req, res) => {
   }
 };
 
-module.exports = { getAllJokes, getRandomJoke, getSpecificJoke, addJoke };
+module.exports = { getAllJokes, getRandomJoke, getSpecificJoke, updateSpecificJoke, deleteSpecificJoke, addJoke };
