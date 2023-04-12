@@ -1,14 +1,13 @@
 const jwt = require('jsonwebtoken');
 const secretKey = process.env.SECRET_KEY;
-const users = require('../database/models/users');
+const Users = require('../database/models/users');
 
 
-// Login controller
 const login = async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    const user = await users.findOne({ where: { email } }); 
+    const user = await Users.findOne({ where: { email } });
 
     if (!user || user.password !== password) {
       return res.status(401).json({ message: 'Invalid email or password' });

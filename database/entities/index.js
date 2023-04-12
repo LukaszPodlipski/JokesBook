@@ -1,6 +1,5 @@
 class User {
     constructor(data){
-        this.id = data.id;
         this.name = data.name;
         this.email = data.email;
         this.password = data.password;
@@ -9,14 +8,12 @@ class User {
 
 class Category {
     constructor(data){
-        this.id = data.id;
         this.name = data?.name;
     }
 }
 
 class Joke {
     constructor(data){
-        this.id = data.id;
         this.userId = data?.userId;
         this.content = data?.content;
         this.categoryId = data?.categoryId;
@@ -26,7 +23,6 @@ class Joke {
 
 class Comment{
     constructor(data){
-        this.id = data.id;
         this.userId = data?.userId;
         this.content = data?.content;
         this.jokeId = data?.jokeId;

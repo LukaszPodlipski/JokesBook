@@ -5,6 +5,7 @@ const { seedDatabase, dropDatabase } = require('./database/seed/index');
 
 const authRouter = require('./routes/authRouter');
 const jokesRouter = require('./routes/jokesRouter');
+const usersRouter = require('./routes/usersRouter');
 
 const app = express();
 
@@ -15,6 +16,7 @@ app.use(bodyParser.urlencoded({ extended: true }));// For parsing URL-encoded da
 // Routes
 app.use('/login', authRouter);
 app.use('/jokes', jokesRouter);
+app.use('/users', usersRouter);
 
 // Start the server
 app.listen(3000, async () => {

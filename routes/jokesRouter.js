@@ -1,7 +1,14 @@
 const express = require('express');
 const router = express.Router();
-const jokesController = require('../controllers/jokesController');
+const { authenticateToken } = require('../controllers/authMiddleware');
+const { getAllJokes, getRandomJoke, getSpecificJoke, addJoke } = require('../controllers/jokesController');
 
-router.get('/', jokesController.getAllJokes);
+router.get('/', getAllJokes);
+
+router.get('/random', getRandomJoke);
+
+router.get('/specific/:id', getSpecificJoke);
+
+router.post('/add', authenticateToken, addJoke);
 
 module.exports = router;
