@@ -19,7 +19,7 @@ const getAllJokes = async (req, res) => {
     res.status(200).json(transformedJokes);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ error: 'Internal server error' });
   }
 };
 
@@ -33,7 +33,7 @@ const getRandomJoke = async (req, res) => {
     res.status(200).json(joke);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ error: 'Internal server error' });
   }
 };
 
@@ -44,47 +44,49 @@ const getSpecificJoke = async (req, res) => {
     if (joke) {
       res.status(200).json(joke);
     } else {
-      res.status(404).json({ message: 'Joke not found' });
+      res.status(404).json({ error: 'Joke not found' });
     }
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ error: 'Internal server error' });
   }
 };
 
 const deleteSpecificJoke = async (req, res) => {
   try {
+    const { user } = req
     const { id } = req.params;
     const joke = await Jokes.findOne({ where: { id } });
-    if (joke) {
+    if (joke && joke?.userId === user?.id) {
       await Jokes.destroy({ where: { id } });
       res.status(200).json({ message: 'Joke deleted succesfully' });
     } else {
-      res.status(404).json({ message: 'Joke not found' });
+      res.status(404).json({ error: 'Joke not found, or you do not have permission to delete' });
     }
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ error: 'Internal server error' });
   }
 };
 
 const updateSpecificJoke = async (req, res) => {
   try {
+    const { user } = req
     const { id } = req.params;
     const joke = await Jokes.findOne({ where: { id } });
     const data = req.body
 
     if (!data.content && !data.categoryId) {
-      res.status(400).json({ message: 'You should provide joke content or category' });
-    } else if (joke) {
+      res.status(400).json({ error: 'You should provide joke content or category' });
+    } else if (joke && joke?.userId === user?.id) {
       await Jokes.update({ ...req.body }, { where: { id } });
       res.status(200).json({ message: 'Joke updated succesfully' });
     } else {
-      res.status(404).json({ message: 'Joke not found' });
+      res.status(404).json({ error: 'Joke not found, or you do not have permission to update' });
     }
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ error: 'Internal server error' });
   }
 };
 
@@ -96,16 +98,19 @@ const addJoke = async (req, res) => {
     res.status(201).json({ message: 'Joke added succesfully' });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ error: 'Internal server error' });
   }
 };
 
 const rateJoke = async (req, res) => {
+  const { user } = req
   const jokeId = req.params.id;
   const rating = req.body.rate;
   try {
     const joke = await Jokes.findOne({ where: { id: jokeId } });
-    if (!joke) throw new Error(`Joke with id ${jokeId} not found`);
+
+    if (!joke) res.status(404).json({ error: `Joke with id ${jokeId} not found` });
+    if (user?.id === joke?.userId) res.status(400).json({ error: "You can't rate your own joke" });
 
     const ratings = joke.ratings || [];
     ratings.push(rating);
@@ -115,7 +120,7 @@ const rateJoke = async (req, res) => {
     res.status(201).json({ message: 'Rating added succesfully' });
   } catch (error) {
     console.error(error);
-    throw new Error('Failed to add rating');
+    res.status(500).json({ error: 'Internal server error' });
   }
 }
 

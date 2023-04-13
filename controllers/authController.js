@@ -10,7 +10,7 @@ const login = async (req, res) => {
     const user = await Users.findOne({ where: { email } });
 
     if (!user || user.password !== password) {
-      return res.status(401).json({ message: 'Invalid email or password' });
+      return res.status(401).json({ error: 'Invalid email or password' });
     }
 
     // Generate JWT token
@@ -20,7 +20,7 @@ const login = async (req, res) => {
     res.json({ token });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ error: 'Internal server error' });
   }
 };
 
