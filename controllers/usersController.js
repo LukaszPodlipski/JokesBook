@@ -4,7 +4,6 @@ const getUser = async (req, res) => {
   const userId = req.user.id;
   try {
     const user = await Users.findOne({ where: { id: userId } });
-
     if (user) {
       res.json(user);
     } else {

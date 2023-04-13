@@ -25,11 +25,7 @@ const getAllJokes = async (req, res) => {
 
 const getRandomJoke = async (req, res) => {
   try {
-    const joke = await Jokes.findOne({
-      order: [
-        [sequelize.fn('RANDOM')]
-      ]
-    });
+    const joke = await Jokes.findOne({ order: [[sequelize.fn('RANDOM')]]});
     res.status(200).json(joke);
   } catch (error) {
     console.error(error);
@@ -57,11 +53,14 @@ const deleteSpecificJoke = async (req, res) => {
     const { user } = req
     const { id } = req.params;
     const joke = await Jokes.findOne({ where: { id } });
-    if (joke && joke?.userId === user?.id) {
+
+    if (!joke){
+      res.status(404).json({ error: 'Joke not found' });
+    } else if (joke?.userId !== user?.id) {
+      res.status(403).json({ error: "User doesn't have permission to delete this joke" });
+    } else {
       await Jokes.destroy({ where: { id } });
       res.status(200).json({ message: 'Joke deleted succesfully' });
-    } else {
-      res.status(404).json({ error: 'Joke not found, or you do not have permission to delete' });
     }
   } catch (error) {
     console.error(error);
@@ -77,12 +76,14 @@ const updateSpecificJoke = async (req, res) => {
     const data = req.body
 
     if (!data.content && !data.categoryId) {
-      res.status(400).json({ error: 'You should provide joke content or category' });
-    } else if (joke && joke?.userId === user?.id) {
+      res.status(400).json({ error: 'No content or category to update' });
+    } else if (!joke) {
+      res.status(404).json({ error: 'Joke not found' });
+    } else if (joke?.userId !== user?.id){
+      res.status(403).json({ error: "User doesn't have permission to update this joke" });
+    } else {
       await Jokes.update({ ...req.body }, { where: { id } });
       res.status(200).json({ message: 'Joke updated succesfully' });
-    } else {
-      res.status(404).json({ error: 'Joke not found, or you do not have permission to update' });
     }
   } catch (error) {
     console.error(error);
@@ -92,8 +93,8 @@ const updateSpecificJoke = async (req, res) => {
 
 const addJoke = async (req, res) => {
   try {
-    const userId = req.user.id
-    const newJoke = new Joke({ ...req.body, userId });
+    const { id } = req.user
+    const newJoke = new Joke({ ...req.body, userId: id });
     await Jokes.create(newJoke);
     res.status(201).json({ message: 'Joke added succesfully' });
   } catch (error) {
@@ -104,20 +105,23 @@ const addJoke = async (req, res) => {
 
 const rateJoke = async (req, res) => {
   const { user } = req
-  const jokeId = req.params.id;
-  const rating = req.body.rate;
+  const { id } = req.params;
+  const { rate } = req.body.rate;
   try {
-    const joke = await Jokes.findOne({ where: { id: jokeId } });
+    const joke = await Jokes.findOne({ where: { id } });
 
-    if (!joke) res.status(404).json({ error: `Joke with id ${jokeId} not found` });
-    if (user?.id === joke?.userId) res.status(400).json({ error: "You can't rate your own joke" });
+    if (!joke){
+      res.status(404).json({ error: `Joke with id ${id} not found` });
+    } else if (user?.id === joke?.userId) {
+      res.status(403).json({ error: "You can't rate your own joke" });
+    } else {
+      const ratings = joke.ratings || [];
+      ratings.push(rate);
 
-    const ratings = joke.ratings || [];
-    ratings.push(rating);
+      await Jokes.update({ ratings }, { where: { id } });
+      res.status(201).json({ message: 'Rating added succesfully' });
+    }
 
-    await Jokes.update({ ratings }, { where: { id: jokeId } });
-
-    res.status(201).json({ message: 'Rating added succesfully' });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal server error' });
