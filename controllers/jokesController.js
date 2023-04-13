@@ -1,19 +1,29 @@
 const sequelize = require('../database/index');
 const Jokes = require('../database/models/jokes')
 const Users = require('../database/models/users')
-const Categories = require('../database/models/categories')
-const { Joke } = require('../database/entities/index')
+const Comments = require('../database/models/comments')
+const Ratings = require('../database/models/ratings')
+const { Joke, Rating, Comment } = require('../database/entities/index')
+const { getJokeComments, getJokeCategory, getJokeRate } = require('./utils/index')
 
 const getAllJokes = async (req, res) => {
   try {
     const jokes = await Jokes.findAll();
-
     const transformedJokes = await Promise.all(jokes.map( async joke =>  {
-      const { id, content, categoryId, ratings } = joke;
-      const rate = ratings?.reduce((acc, curr) => acc + curr, 0) / ratings?.length || 0;
-      const user = await Users.findOne({ where: { id: joke.userId } });
-      const category = await Categories.findOne({ where: { id: joke.categoryId } });
-      return { id, user: user.name, category: { id: categoryId, name: category.name }, content, rate };
+      const { id, content, categoryId } = joke;
+
+      const rate = await getJokeRate(id)
+      const comments = await getJokeComments(id)
+      const category = await getJokeCategory(categoryId)
+      const user = await Users.findOne({ where: { id: joke.userId } }).then(user => user.name);
+      return {
+        id,
+        user,
+        category,
+        content,
+        rate,
+        comments
+      };
     }));
 
     res.status(200).json(transformedJokes);
@@ -25,7 +35,17 @@ const getAllJokes = async (req, res) => {
 
 const getRandomJoke = async (req, res) => {
   try {
-    const joke = await Jokes.findOne({ order: [[sequelize.fn('RANDOM')]]});
+    const { id, content, categoryId } = await Jokes.findOne({ order: [[sequelize.fn('RANDOM')]]});
+    const rate = await getJokeRate(id)
+    const comments = await getJokeComments(id)
+    const category = await getJokeCategory(categoryId)
+    const joke = {
+      id,
+      category,
+      content,
+      rate,
+      comments
+    };
     res.status(200).json(joke);
   } catch (error) {
     console.error(error);
@@ -38,7 +58,18 @@ const getSpecificJoke = async (req, res) => {
     const { id } = req.params;
     const joke = await Jokes.findOne({ where: { id } });
     if (joke) {
-      res.status(200).json(joke);
+      const { content, categoryId } = joke;
+      const rate = await getJokeRate(id)
+      const comments = await getJokeComments(id)
+      const category = await getJokeCategory(categoryId)
+      const newJoke = {
+        id,
+        category,
+        content,
+        rate,
+        comments
+      };
+      res.status(200).json(newJoke);
     } else {
       res.status(404).json({ error: 'Joke not found' });
     }
@@ -106,7 +137,7 @@ const addJoke = async (req, res) => {
 const rateJoke = async (req, res) => {
   const { user } = req
   const { id } = req.params;
-  const { rate } = req.body.rate;
+  const { rate } = req.body;
   try {
     const joke = await Jokes.findOne({ where: { id } });
 
@@ -115,10 +146,8 @@ const rateJoke = async (req, res) => {
     } else if (user?.id === joke?.userId) {
       res.status(403).json({ error: "You can't rate your own joke" });
     } else {
-      const ratings = joke.ratings || [];
-      ratings.push(rate);
-
-      await Jokes.update({ ratings }, { where: { id } });
+      const newRate = new Rating({ rate, userId: user.id, jokeId: id });
+      await Ratings.create(newRate);
       res.status(201).json({ message: 'Rating added succesfully' });
     }
 
@@ -128,4 +157,19 @@ const rateJoke = async (req, res) => {
   }
 }
 
-module.exports = { getAllJokes, getRandomJoke, getSpecificJoke, updateSpecificJoke, deleteSpecificJoke, addJoke, rateJoke };
+const commentJoke = async (req, res) => {
+  const { user } = req
+  const { id } = req.params;
+  const { comment } = req.body;
+  try {
+    if (!comment) res.status(400).json({ error: 'No comment to add' });
+    else await Comments.create({ content:comment, userId: user.id, jokeId: id });
+    res.status(201).json({ message: 'Comment added succesfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+}
+
+
+module.exports = { getAllJokes, getRandomJoke, getSpecificJoke, updateSpecificJoke, deleteSpecificJoke, addJoke, rateJoke, commentJoke };

@@ -1,32 +1,32 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../index');
 
-const Jokes = sequelize.define('jokes', {
+const Ratings = sequelize.define('ratings', {
   id: {
     type: DataTypes.INTEGER,
     autoIncrement: true,
     primaryKey: true,
   },
-  userId: {
+  rate: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  jokeId:{
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: 'jokes',
+      key: 'id'
+    }
+  },
+  userId:{
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
       model: 'users',
       key: 'id'
     }
-  },
-  content: {
-    type: DataTypes.TEXT,
-    allowNull: false,
-  },
-  categoryId: {
-    type: DataTypes.INTEGER,
-    allowNull: true,
-    references: {
-      model: 'categories',
-      key: 'id'
-    }
-  },
+  }
 });
 
-module.exports = Jokes;
+module.exports = Ratings;

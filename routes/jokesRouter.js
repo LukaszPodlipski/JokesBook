@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { authenticateToken } = require('../controllers/authMiddleware');
-const { getAllJokes, getRandomJoke, getSpecificJoke, updateSpecificJoke, deleteSpecificJoke, addJoke, rateJoke } = require('../controllers/jokesController');
+const { getAllJokes, getRandomJoke, getSpecificJoke, updateSpecificJoke, deleteSpecificJoke, addJoke, rateJoke, commentJoke } = require('../controllers/jokesController');
 
 router.get('/', getAllJokes);
 
@@ -15,6 +15,8 @@ router.delete('/specific/:id', authenticateToken, deleteSpecificJoke);
 
 router.patch('/specific/:id', authenticateToken, updateSpecificJoke);
 
-router.patch('/rate/:id', authenticateToken, rateJoke);
+router.post('/rate/:id', authenticateToken, rateJoke);
+
+router.post('/comment/:id', authenticateToken, commentJoke)
 
 module.exports = router;

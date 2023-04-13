@@ -17,16 +17,23 @@ class Joke {
         this.userId = data?.userId;
         this.content = data?.content;
         this.categoryId = data?.categoryId;
-        this.ratings = data?.ratings || [];
     }
 }
 
 class Comment{
     constructor(data){
         this.userId = data?.userId;
-        this.content = data?.content;
+        this.content = data?.content || data?.content;
         this.jokeId = data?.jokeId;
     }
 }
 
-module.exports = { User, Category, Joke, Comment };
+class Rating{
+    constructor(data){
+        this.rate = data?.rate;
+        this.jokeId = data?.jokeId;
+        this.userId = data?.userId;
+    }
+}
+
+module.exports = { User, Category, Joke, Comment, Rating };

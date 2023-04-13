@@ -1,7 +1,7 @@
 const fs = require('fs');
 const csv = require('csv-parser');
-const { Users, Jokes, Categories, Comments } = require('../associations');
-const { User, Category, Joke, Comment } = require('../entities/index');
+const { Users, Jokes, Categories, Comments, Ratings } = require('../associations');
+const { User, Category, Joke, Comment, Rating } = require('../entities/index');
 const sequelize = require('../index');
 
 const seeds = [
@@ -24,11 +24,17 @@ const seeds = [
     dataModel: (row) => new Joke(row),
   },
   {
+    name: 'ratings',
+    model: Ratings,
+    data: './database/seed/data/ratings.csv',
+    dataModel: (row) => new Rating(row),
+  },
+  {
     name: 'comments',
     model: Comments,
     data: './database/seed/data/comments.csv',
     dataModel: (row) => new Comment(row),
-  }
+  },
 ]
 
 async function seedModel(seed){
