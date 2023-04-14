@@ -38,10 +38,11 @@ To run this project, you will need to add the following environment variables to
 
 DATABASE_NAME=postgres
 
-DATABASE_USERNAME=username
+DATABASE_USERNAME=postgres_username
 
-DATABASE_PASSWORD=password
+DATABASE_PASSWORD=postgres_password
 
+SECRET_KEY= YOUR_SECRET_KEY_FOR_JWT_AUTHORIZATION
 
 ## Documentation
 
