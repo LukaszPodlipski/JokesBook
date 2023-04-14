@@ -58,3 +58,9 @@ DATABASE_PASSWORD=password
 ./database/models/ - database models
 
 ./database/entities/ - data models
+
+./controllers/ - all controllers 
+
+./controllers/utils/index.js - utility functions used in controllers
+
+./routes/ - all routes
