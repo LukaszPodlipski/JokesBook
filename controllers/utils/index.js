@@ -5,7 +5,7 @@ const Ratings = require('../../database/models/ratings')
 
 const getJokeComments = async (jokeId) => {
   return await Promise.all(
-    await Comments.findAll({ where: { jokeId } }).then(comment => comment.map(async comment => {
+    await Comments.findAll({ where: { jokeId } }).then(comments => comments.map(async comment => {
       const author = await Users.findOne({ where: { id: comment.userId } });
       return {
         id: comment.id,
@@ -27,4 +27,23 @@ const getJokeRate = async (jokeId) => {
   return rate;
 }
 
-module.exports = { getJokeComments, getJokeCategory, getJokeRate }
+const getJokeUser = async (userId) => {
+  return await Users.findOne({ where: { id: userId } }).then(user => user.name);
+}
+
+const getCompleteJoke = async (jokeId, categoryId, userId, content) => {
+  const rate = await getJokeRate(jokeId)
+  const comments = await getJokeComments(jokeId)
+  const category = await getJokeCategory(categoryId)
+  const user = await getJokeUser(userId)
+  return {
+    id: jokeId,
+    category,
+    user,
+    content,
+    rate,
+    comments
+  };
+}
+
+module.exports = { getJokeComments, getJokeCategory, getJokeRate, getJokeUser, getCompleteJoke }

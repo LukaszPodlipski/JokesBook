@@ -1,29 +1,16 @@
 const sequelize = require('../database/index');
 const Jokes = require('../database/models/jokes')
-const Users = require('../database/models/users')
 const Comments = require('../database/models/comments')
 const Ratings = require('../database/models/ratings')
 const { Joke, Rating, Comment } = require('../database/entities/index')
-const { getJokeComments, getJokeCategory, getJokeRate } = require('./utils/index')
+const { getCompleteJoke } = require('./utils/index')
 
 const getAllJokes = async (req, res) => {
   try {
     const jokes = await Jokes.findAll();
     const transformedJokes = await Promise.all(jokes.map( async joke =>  {
-      const { id, content, categoryId } = joke;
-
-      const rate = await getJokeRate(id)
-      const comments = await getJokeComments(id)
-      const category = await getJokeCategory(categoryId)
-      const user = await Users.findOne({ where: { id: joke.userId } }).then(user => user.name);
-      return {
-        id,
-        user,
-        category,
-        content,
-        rate,
-        comments
-      };
+      const { id, categoryId, userId, content } = joke;
+      return await getCompleteJoke(id, categoryId, userId, content)
     }));
 
     res.status(200).json(transformedJokes);
@@ -35,17 +22,8 @@ const getAllJokes = async (req, res) => {
 
 const getRandomJoke = async (req, res) => {
   try {
-    const { id, content, categoryId } = await Jokes.findOne({ order: [[sequelize.fn('RANDOM')]]});
-    const rate = await getJokeRate(id)
-    const comments = await getJokeComments(id)
-    const category = await getJokeCategory(categoryId)
-    const joke = {
-      id,
-      category,
-      content,
-      rate,
-      comments
-    };
+    const { id, categoryId, userId, content } = await Jokes.findOne({ order: [[sequelize.fn('RANDOM')]]});
+    const joke = await getCompleteJoke(id, categoryId, userId, content)
     res.status(200).json(joke);
   } catch (error) {
     console.error(error);
@@ -58,17 +36,8 @@ const getSpecificJoke = async (req, res) => {
     const { id } = req.params;
     const joke = await Jokes.findOne({ where: { id } });
     if (joke) {
-      const { content, categoryId } = joke;
-      const rate = await getJokeRate(id)
-      const comments = await getJokeComments(id)
-      const category = await getJokeCategory(categoryId)
-      const newJoke = {
-        id,
-        category,
-        content,
-        rate,
-        comments
-      };
+      const { categoryId, userId, content } = joke;
+      const newJoke = await getCompleteJoke(id, categoryId, userId, content)
       res.status(200).json(newJoke);
     } else {
       res.status(404).json({ error: 'Joke not found' });
@@ -146,8 +115,8 @@ const rateJoke = async (req, res) => {
     } else if (user?.id === joke?.userId) {
       res.status(403).json({ error: "You can't rate your own joke" });
     } else {
-      const newRate = new Rating({ rate, userId: user.id, jokeId: id });
-      await Ratings.create(newRate);
+      const newRating = new Rating({ rate, userId: user.id, jokeId: id });
+      await Ratings.create(newRating);
       res.status(201).json({ message: 'Rating added succesfully' });
     }
 
@@ -162,9 +131,13 @@ const commentJoke = async (req, res) => {
   const { id } = req.params;
   const { comment } = req.body;
   try {
-    if (!comment) res.status(400).json({ error: 'No comment to add' });
-    else await Comments.create({ content:comment, userId: user.id, jokeId: id });
-    res.status(201).json({ message: 'Comment added succesfully' });
+    if (!comment) {
+      res.status(400).json({ error: 'No comment to add' });
+    } else {
+      const newComment = new Comment({ content:comment, userId: user.id, jokeId: id });
+      await Comments.create(newComment);
+      res.status(201).json({ message: 'Comment added succesfully' });
+    }
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal server error' });
