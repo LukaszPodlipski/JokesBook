@@ -22,6 +22,8 @@ export interface IJoke extends IColumn {
   categoryId: number;
 }
 
+type IJokeClass = Omit<IJoke, 'id'>;
+
 export interface IComment extends IColumn {
   id?: number;
   userId: number;
@@ -29,12 +31,16 @@ export interface IComment extends IColumn {
   jokeId: number;
 }
 
+type ICommentClass = Omit<IComment, 'id'>;
+
 export interface IRating extends IColumn {
   id?: number;
   rate: number;
   jokeId: number;
   userId: number;
 }
+
+type IRatingClass = Omit<IRating, 'id'>;
 
 export class User implements IUser {
   name: string;
@@ -60,42 +66,36 @@ export class Category implements ICategory {
   }
 }
 
-export class Joke implements IJoke {
-  id: number;
+export class Joke implements IJokeClass {
   userId: number;
   content: string;
   categoryId: number;
 
   constructor(data: IJoke) {
-    this.id = data?.id;
     this.userId = data?.userId;
     this.content = data?.content;
     this.categoryId = data?.categoryId;
   }
 }
 
-export class Comment implements IComment {
-  id: number;
+export class Comment implements ICommentClass {
   userId: number;
   content: string;
   jokeId: number;
 
   constructor(data: IComment) {
-    this.id = data?.id;
     this.userId = data?.userId;
     this.content = data?.content || data?.content;
     this.jokeId = data?.jokeId;
   }
 }
 
-export class Rating implements IRating {
-  id: number;
+export class Rating implements IRatingClass {
   rate: number;
   jokeId: number;
   userId: number;
 
   constructor(data: IRating) {
-    this.id = data?.id;
     this.rate = data?.rate;
     this.jokeId = data?.jokeId;
     this.userId = data?.userId;
