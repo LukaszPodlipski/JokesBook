@@ -26,7 +26,7 @@ export const getRandomJoke = async (req, res) => {
   try {
     const { id, categoryId, userId, content } = await Jokes.findOne({
       order: [[sequelize.fn('RANDOM')]],
-    } as any);
+    } as unknown);
     const joke = await getCompleteJoke(id, categoryId, userId, content);
     res.status(200).json(joke);
   } catch (error) {
