@@ -1,7 +1,10 @@
-const { DataTypes } = require('sequelize');
-const sequelize = require('../index');
+import { DataTypes, Model } from 'sequelize';
+import sequelize from '../index';
+import { IRating } from 'database/entities';
 
-const Ratings = sequelize.define('ratings', {
+interface RatingModel extends Model<IRating>, IRating {}
+
+export const Ratings = sequelize.define<RatingModel>('ratings', {
   id: {
     type: DataTypes.INTEGER,
     autoIncrement: true,
@@ -11,22 +14,20 @@ const Ratings = sequelize.define('ratings', {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  jokeId:{
+  jokeId: {
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
       model: 'jokes',
-      key: 'id'
-    }
+      key: 'id',
+    },
   },
-  userId:{
+  userId: {
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
       model: 'users',
-      key: 'id'
-    }
-  }
+      key: 'id',
+    },
+  },
 });
-
-module.exports = Ratings;

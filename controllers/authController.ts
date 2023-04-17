@@ -1,9 +1,10 @@
-const jwt = require('jsonwebtoken');
+import jwt from 'jsonwebtoken';
+import { Users } from '../database/models/users';
+import { Request, Response } from 'express';
+
 const secretKey = process.env.SECRET_KEY;
-const Users = require('../database/models/users');
 
-
-const login = async (req, res) => {
+export const login = async (req: Request, res: Response) => {
   const { email, password } = req.body;
 
   try {
@@ -23,5 +24,3 @@ const login = async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
-
-module.exports = { login };

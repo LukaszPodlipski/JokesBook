@@ -1,8 +1,8 @@
-const fs = require('fs');
-const csv = require('csv-parser');
-const { Users, Jokes, Categories, Comments, Ratings } = require('../associations');
-const { User, Category, Joke, Comment, Rating } = require('../entities/index');
-const sequelize = require('../index');
+import fs from 'fs';
+import csv from 'csv-parser';
+import sequelize from '../index';
+import { User, Category, Joke, Comment, Rating } from '../entities/';
+import { Users, Jokes, Categories, Comments, Ratings } from '../associations';
 
 const seeds = [
   {
@@ -35,9 +35,9 @@ const seeds = [
     data: './database/seed/data/comments.csv',
     dataModel: (row) => new Comment(row),
   },
-]
+];
 
-async function seedModel(seed){
+async function seedModel(seed) {
   fs.createReadStream(seed.data)
     .pipe(csv())
     .on('data', (row) => {
@@ -48,13 +48,13 @@ async function seedModel(seed){
     });
 }
 
-async function seedDatabase() {
+export async function seedDatabase() {
   for (const seed of seeds) {
     await seedModel(seed);
   }
 }
 
-const dropDatabase = async () => {
+export const dropDatabase = async () => {
   try {
     await sequelize.query('DROP SCHEMA public CASCADE;');
     await sequelize.query('CREATE SCHEMA public;');
@@ -63,5 +63,3 @@ const dropDatabase = async () => {
     console.error(error);
   }
 };
-
-module.exports = { seedDatabase, dropDatabase };

@@ -1,7 +1,7 @@
-const jwt = require('jsonwebtoken');
+import jwt from 'jsonwebtoken';
 const secretKey = process.env.SECRET_KEY;
 
-const authenticateToken = (req, res, next) => {
+export const authenticateToken = (req, res, next) => {
   const token = req.header('Authorization');
 
   if (!token) {
@@ -17,5 +17,3 @@ const authenticateToken = (req, res, next) => {
     next();
   });
 };
-
-module.exports = { authenticateToken };

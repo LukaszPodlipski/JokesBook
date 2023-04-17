@@ -1,7 +1,10 @@
-const { DataTypes } = require('sequelize');
-const sequelize = require('../index');
+import { DataTypes, Model } from 'sequelize';
+import sequelize from '../index';
+import { IJoke } from 'database/entities';
 
-const Jokes = sequelize.define('jokes', {
+interface JokeModel extends Model<IJoke>, IJoke {}
+
+export const Jokes = sequelize.define<JokeModel>('jokes', {
   id: {
     type: DataTypes.INTEGER,
     autoIncrement: true,
@@ -12,8 +15,8 @@ const Jokes = sequelize.define('jokes', {
     allowNull: false,
     references: {
       model: 'users',
-      key: 'id'
-    }
+      key: 'id',
+    },
   },
   content: {
     type: DataTypes.TEXT,
@@ -24,9 +27,7 @@ const Jokes = sequelize.define('jokes', {
     allowNull: true,
     references: {
       model: 'categories',
-      key: 'id'
-    }
+      key: 'id',
+    },
   },
 });
-
-module.exports = Jokes;

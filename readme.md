@@ -1,4 +1,3 @@
-
 # JokesBook
 
 Simple app to share jokes :)
@@ -20,7 +19,7 @@ Install dependencies
 Start the server
 
 ```bash
-  node app.js
+  npm run start:nodemon
 ```
 
 ## Running Tests
@@ -34,7 +33,6 @@ To run tests, run the following command
 ## Environment Variables
 
 To run this project, you will need to add the following environment variables to your .env file
-
 
 DATABASE_NAME=postgres
 
@@ -60,7 +58,7 @@ SECRET_KEY= YOUR_SECRET_KEY_FOR_JWT_AUTHORIZATION
 
 ./database/entities/ - data models
 
-./controllers/ - all controllers 
+./controllers/ - all controllers
 
 ./controllers/utils/index.js - utility functions used in controllers
 

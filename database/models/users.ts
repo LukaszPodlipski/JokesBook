@@ -1,7 +1,10 @@
-const { DataTypes } = require('sequelize');
-const sequelize = require('../index');
+import { DataTypes, Model } from 'sequelize';
+import sequelize from '../index';
+import { IUser } from 'database/entities';
 
-const Users = sequelize.define('users', {
+interface UserModel extends Model<IUser>, IUser {}
+
+export const Users = sequelize.define<UserModel>('users', {
   id: {
     type: DataTypes.INTEGER,
     autoIncrement: true,
@@ -24,5 +27,3 @@ const Users = sequelize.define('users', {
     allowNull: false,
   },
 });
-
-module.exports = Users;

@@ -1,7 +1,18 @@
-const express = require('express');
+import express from 'express';
+import { authenticateToken } from '../controllers/authMiddleware';
+
 const router = express.Router();
-const { authenticateToken } = require('../controllers/authMiddleware');
-const { getAllJokes, getRandomJoke, getSpecificJoke, updateSpecificJoke, deleteSpecificJoke, addJoke, rateJoke, commentJoke } = require('../controllers/jokesController');
+
+import {
+  getAllJokes,
+  getRandomJoke,
+  getSpecificJoke,
+  addJoke,
+  deleteSpecificJoke,
+  updateSpecificJoke,
+  rateJoke,
+  commentJoke,
+} from '../controllers/jokesController';
 
 router.get('/', getAllJokes);
 
@@ -17,6 +28,6 @@ router.patch('/specific/:id', authenticateToken, updateSpecificJoke);
 
 router.post('/rate/:id', authenticateToken, rateJoke);
 
-router.post('/comment/:id', authenticateToken, commentJoke)
+router.post('/comment/:id', authenticateToken, commentJoke);
 
-module.exports = router;
+export default router;

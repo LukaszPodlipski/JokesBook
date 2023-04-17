@@ -1,6 +1,6 @@
-const Users = require('../database/models/users');
+import { Users } from '../database/models/users';
 
-const getUser = async (req, res) => {
+export const getUser = async (req, res) => {
   const userId = req.user.id;
   try {
     const user = await Users.findOne({ where: { id: userId } });
@@ -14,5 +14,3 @@ const getUser = async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
-
-module.exports = { getUser };

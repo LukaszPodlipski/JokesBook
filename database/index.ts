@@ -1,6 +1,7 @@
-require("dotenv").config();
+import dotenv from 'dotenv';
+import { Sequelize } from 'sequelize';
 
-const Sequelize = require('sequelize');
+dotenv.config();
 
 // create a new sequelize instance with the local postgres database information.
 const sequelize = new Sequelize(process.env.DATABASE_NAME, process.env.DATABASE_USERNAME, process.env.DATABASE_PASSWORD, {
@@ -9,7 +10,8 @@ const sequelize = new Sequelize(process.env.DATABASE_NAME, process.env.DATABASE_
 });
 
 // test the connection to the database
-sequelize.authenticate()
+sequelize
+  .authenticate()
   .then(() => {
     console.log('Connection has been established successfully.');
   })
@@ -17,4 +19,4 @@ sequelize.authenticate()
     console.error('Unable to connect to the database:', err);
   });
 
-module.exports = sequelize;
+export default sequelize;
