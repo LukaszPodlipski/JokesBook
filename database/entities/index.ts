@@ -1,5 +1,13 @@
 import { Request } from 'express';
 
+export interface IAuthenticatedRequest extends Request {
+  user?: IUser;
+}
+
+export interface IAuthReqTypedBody<T> extends IAuthenticatedRequest {
+  body: T;
+}
+
 interface IColumn {
   createdAt?: Date;
   updatedAt?: Date;
@@ -12,10 +20,6 @@ export interface IUser extends IColumn {
   id: number;
 }
 
-export interface AuthenticatedRequest extends Request {
-  user?: IUser;
-}
-
 export interface ICategory extends IColumn {
   id?: number;
   name: string;
@@ -26,6 +30,10 @@ export interface IJoke extends IColumn {
   userId: number;
   content: string;
   categoryId: number;
+}
+
+export interface ISpecificJokeParams {
+  id: number;
 }
 
 type IJokeClass = Omit<IJoke, 'id'>;
@@ -77,7 +85,7 @@ export class Joke implements IJokeClass {
   content: string;
   categoryId: number;
 
-  constructor(data: IJoke) {
+  constructor(data: IJokeClass) {
     this.userId = data?.userId;
     this.content = data?.content;
     this.categoryId = data?.categoryId;
@@ -89,7 +97,7 @@ export class Comment implements ICommentClass {
   content: string;
   jokeId: number;
 
-  constructor(data: IComment) {
+  constructor(data: ICommentClass) {
     this.userId = data?.userId;
     this.content = data?.content || data?.content;
     this.jokeId = data?.jokeId;
@@ -101,7 +109,7 @@ export class Rating implements IRatingClass {
   jokeId: number;
   userId: number;
 
-  constructor(data: IRating) {
+  constructor(data: IRatingClass) {
     this.rate = data?.rate;
     this.jokeId = data?.jokeId;
     this.userId = data?.userId;

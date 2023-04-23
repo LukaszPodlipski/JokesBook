@@ -1,6 +1,7 @@
 import jwt from 'jsonwebtoken';
 import { Users } from '../database/models/users';
 import { Request, Response } from 'express';
+import { errorHandler } from './utils';
 
 const secretKey = process.env.SECRET_KEY;
 
@@ -20,7 +21,6 @@ export const login = async (req: Request, res: Response) => {
     // Return token as response
     res.json({ token });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Internal server error' });
+    errorHandler(err, res);
   }
 };
