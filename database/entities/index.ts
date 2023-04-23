@@ -8,6 +8,10 @@ export interface IAuthReqTypedBody<T> extends IAuthenticatedRequest {
   body: T;
 }
 
+export interface IUnAuthenticatedRequest<T> extends Request {
+  body: T;
+}
+
 interface IColumn {
   createdAt?: Date;
   updatedAt?: Date;

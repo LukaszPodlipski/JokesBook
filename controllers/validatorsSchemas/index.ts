@@ -27,3 +27,8 @@ export const updateJokeBodySchema = yup
     const { content, categoryId } = value || {};
     return !!content || !!categoryId;
   });
+
+export const loginSchema = yup.object().shape({
+  email: yup.string().email().required('Email is required'),
+  password: yup.string().required('Password is required'),
+});
