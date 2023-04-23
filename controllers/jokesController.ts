@@ -1,3 +1,6 @@
+import { Request, Response } from 'express';
+import { AuthenticatedRequest } from 'database/entities';
+
 import { getCompleteJoke } from './utils';
 import sequelize from '../database';
 import { Joke, Rating, Comment } from '../database/entities/index';
@@ -5,7 +8,7 @@ import { Jokes } from '../database/models/jokes';
 import { Comments } from '../database/models/comments';
 import { Ratings } from '../database/models/ratings';
 
-export const getAllJokes = async (req, res) => {
+export const getAllJokes = async (req: Request, res: Response) => {
   try {
     const jokes = await Jokes.findAll();
     const transformedJokes = await Promise.all(
@@ -22,7 +25,7 @@ export const getAllJokes = async (req, res) => {
   }
 };
 
-export const getRandomJoke = async (req, res) => {
+export const getRandomJoke = async (req: Request, res: Response) => {
   try {
     const { id, categoryId, userId, content } = await Jokes.findOne({
       order: [[sequelize.fn('RANDOM')]],
@@ -35,9 +38,9 @@ export const getRandomJoke = async (req, res) => {
   }
 };
 
-export const getSpecificJoke = async (req, res) => {
+export const getSpecificJoke = async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
+    const id = Number(req.params.id);
     const joke = await Jokes.findOne({ where: { id } });
     if (joke) {
       const { categoryId, userId, content } = joke;
@@ -52,7 +55,7 @@ export const getSpecificJoke = async (req, res) => {
   }
 };
 
-export const deleteSpecificJoke = async (req, res) => {
+export const deleteSpecificJoke = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { user } = req;
     const { id } = req.params;
@@ -74,7 +77,7 @@ export const deleteSpecificJoke = async (req, res) => {
   }
 };
 
-export const updateSpecificJoke = async (req, res) => {
+export const updateSpecificJoke = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { user } = req;
     const { id } = req.params;
@@ -99,7 +102,7 @@ export const updateSpecificJoke = async (req, res) => {
   }
 };
 
-export const addJoke = async (req, res) => {
+export const addJoke = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { id } = req.user;
     const newJoke = new Joke({ ...req.body, userId: id });
@@ -111,9 +114,9 @@ export const addJoke = async (req, res) => {
   }
 };
 
-export const rateJoke = async (req, res) => {
+export const rateJoke = async (req: AuthenticatedRequest, res: Response) => {
   const { user } = req;
-  const { id } = req.params;
+  const id = Number(req.params.id);
   const { rate } = req.body;
   try {
     const joke = await Jokes.findOne({ where: { id } });
@@ -137,9 +140,9 @@ export const rateJoke = async (req, res) => {
   }
 };
 
-export const commentJoke = async (req, res) => {
+export const commentJoke = async (req: AuthenticatedRequest, res: Response) => {
   const { user } = req;
-  const { id } = req.params;
+  const id = Number(req.params.id);
   const { comment } = req.body;
   try {
     if (!comment) {

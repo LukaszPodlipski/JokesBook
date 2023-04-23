@@ -1,12 +1,8 @@
 import jwt from 'jsonwebtoken';
-import { Request, Response, NextFunction } from 'express';
-import { IUser } from 'database/entities';
+import { Response, NextFunction } from 'express';
+import { IUser, AuthenticatedRequest } from 'database/entities';
 
 const secretKey = process.env.SECRET_KEY;
-
-interface AuthenticatedRequest extends Request {
-  user?: IUser;
-}
 
 export const authenticateToken = (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   const token: string | undefined = req.header('Authorization');

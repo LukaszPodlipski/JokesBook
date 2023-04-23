@@ -1,6 +1,9 @@
+import { Response } from 'express';
+import { AuthenticatedRequest } from 'database/entities';
+
 import { Users } from '../database/models/users';
 
-export const getUser = async (req, res) => {
+export const getUser = async (req: AuthenticatedRequest, res: Response) => {
   const userId = req.user.id;
   try {
     const user = await Users.findOne({ where: { id: userId } });

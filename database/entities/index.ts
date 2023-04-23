@@ -1,3 +1,5 @@
+import { Request } from 'express';
+
 interface IColumn {
   createdAt?: Date;
   updatedAt?: Date;
@@ -8,6 +10,10 @@ export interface IUser extends IColumn {
   email: string;
   password: string;
   id: number;
+}
+
+export interface AuthenticatedRequest extends Request {
+  user?: IUser;
 }
 
 export interface ICategory extends IColumn {
