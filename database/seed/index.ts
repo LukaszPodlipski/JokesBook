@@ -50,7 +50,10 @@ async function seedModel(seed) {
 
 export async function seedDatabase() {
   for (const seed of seeds) {
+    const tableName = seed.model.getTableName();
+    await sequelize.query(`ALTER TABLE "${tableName}" DISABLE TRIGGER ALL`); //  disables all triggers (including foreign key constraints) for the table being seeded
     await seedModel(seed);
+    await sequelize.query(`ALTER TABLE "${tableName}" ENABLE TRIGGER ALL`);
   }
 }
 
