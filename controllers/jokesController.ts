@@ -1,11 +1,22 @@
-import { getCompleteJoke } from './utils';
+import { Request, Response } from 'express';
+import { IAuthenticatedRequest, ISpecificJokeParams, IAuthReqTypedBody } from 'database/entities';
+
+import {
+  specificJokeParamsSchema,
+  rateJokeBodySchema,
+  commentJokeBodySchema,
+  addJokeBodySchema,
+  updateJokeBodySchema,
+} from './validatorsSchemas';
+
+import { getCompleteJoke, errorHandler } from './utils';
 import sequelize from '../database';
 import { Joke, Rating, Comment } from '../database/entities/index';
 import { Jokes } from '../database/models/jokes';
 import { Comments } from '../database/models/comments';
 import { Ratings } from '../database/models/ratings';
 
-export const getAllJokes = async (req, res) => {
+export const getAllJokes = async (req: Request, res: Response) => {
   try {
     const jokes = await Jokes.findAll();
     const transformedJokes = await Promise.all(
@@ -17,12 +28,11 @@ export const getAllJokes = async (req, res) => {
 
     res.status(200).json(transformedJokes);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Internal server error' });
+    errorHandler(error, res);
   }
 };
 
-export const getRandomJoke = async (req, res) => {
+export const getRandomJoke = async (req: Request, res: Response) => {
   try {
     const { id, categoryId, userId, content } = await Jokes.findOne({
       order: [[sequelize.fn('RANDOM')]],
@@ -30,15 +40,17 @@ export const getRandomJoke = async (req, res) => {
     const joke = await getCompleteJoke(id, categoryId, userId, content);
     res.status(200).json(joke);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Internal server error' });
+    errorHandler(error, res);
   }
 };
 
-export const getSpecificJoke = async (req, res) => {
+export const getSpecificJoke = async (req: Request & { params: ISpecificJokeParams }, res: Response) => {
   try {
+    await specificJokeParamsSchema.validate(req.params);
+
     const { id } = req.params;
     const joke = await Jokes.findOne({ where: { id } });
+
     if (joke) {
       const { categoryId, userId, content } = joke;
       const newJoke = await getCompleteJoke(id, categoryId, userId, content);
@@ -47,15 +59,17 @@ export const getSpecificJoke = async (req, res) => {
       res.status(404).json({ error: 'Joke not found' });
     }
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Internal server error' });
+    errorHandler(error, res);
   }
 };
 
-export const deleteSpecificJoke = async (req, res) => {
+export const deleteSpecificJoke = async (req: IAuthenticatedRequest & { params: ISpecificJokeParams }, res: Response) => {
   try {
+    await specificJokeParamsSchema.validate(req.params);
+
     const { user } = req;
     const { id } = req.params;
+
     const joke = await Jokes.findOne({ where: { id } });
 
     if (!joke) {
@@ -69,21 +83,21 @@ export const deleteSpecificJoke = async (req, res) => {
       res.status(200).json({ message: 'Joke deleted succesfully' });
     }
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Internal server error' });
+    errorHandler(error, res);
   }
 };
 
-export const updateSpecificJoke = async (req, res) => {
+export const updateSpecificJoke = async (req: IAuthenticatedRequest & { params: ISpecificJokeParams }, res: Response) => {
   try {
+    await specificJokeParamsSchema.validate(req.params);
+    await updateJokeBodySchema.validate(req.body);
+
     const { user } = req;
     const { id } = req.params;
-    const joke = await Jokes.findOne({ where: { id } });
-    const data = req.body;
 
-    if (!data.content && !data.categoryId) {
-      res.status(400).json({ error: 'No content or category to update' });
-    } else if (!joke) {
+    const joke = await Jokes.findOne({ where: { id } });
+
+    if (!joke) {
       res.status(404).json({ error: 'Joke not found' });
     } else if (joke?.userId !== user?.id) {
       res.status(403).json({
@@ -94,28 +108,33 @@ export const updateSpecificJoke = async (req, res) => {
       res.status(200).json({ message: 'Joke updated succesfully' });
     }
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Internal server error' });
+    errorHandler(error, res);
   }
 };
 
-export const addJoke = async (req, res) => {
+export const addJoke = async (req: IAuthReqTypedBody<{ content: string; categoryId: number }>, res: Response) => {
   try {
+    await addJokeBodySchema.validate(req.body);
+
+    const { content, categoryId } = req.body;
     const { id } = req.user;
-    const newJoke = new Joke({ ...req.body, userId: id });
+
+    const newJoke = new Joke({ content, categoryId, userId: id });
     await Jokes.create(newJoke);
     res.status(201).json({ message: 'Joke added succesfully' });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Internal server error' });
+    errorHandler(error, res);
   }
 };
 
-export const rateJoke = async (req, res) => {
-  const { user } = req;
-  const { id } = req.params;
-  const { rate } = req.body;
+export const rateJoke = async (req: IAuthReqTypedBody<{ rate: number }> & { params: ISpecificJokeParams }, res: Response) => {
   try {
+    await specificJokeParamsSchema.validate(req.params);
+    await rateJokeBodySchema.validate(req.body);
+
+    const { id } = req.params;
+    const { user } = req;
+    const { rate } = req.body;
     const joke = await Jokes.findOne({ where: { id } });
 
     if (!joke) {
@@ -132,21 +151,26 @@ export const rateJoke = async (req, res) => {
       res.status(201).json({ message: 'Rating added succesfully' });
     }
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Internal server error' });
+    errorHandler(error, res);
   }
 };
 
-export const commentJoke = async (req, res) => {
-  const { user } = req;
-  const { id } = req.params;
-  const { comment } = req.body;
+export const commentJoke = async (
+  req: IAuthReqTypedBody<{ content: string }> & { params: ISpecificJokeParams },
+  res: Response
+) => {
   try {
-    if (!comment) {
+    await specificJokeParamsSchema.validate(req.params);
+    await commentJokeBodySchema.validate(req.body);
+
+    const { user } = req;
+    const id = req.params.id;
+    const { content } = req.body;
+    if (!content) {
       res.status(400).json({ error: 'No comment to add' });
     } else {
       const newComment = new Comment({
-        content: comment,
+        content,
         userId: user.id,
         jokeId: id,
       });
@@ -154,7 +178,6 @@ export const commentJoke = async (req, res) => {
       res.status(201).json({ message: 'Comment added succesfully' });
     }
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Internal server error' });
+    errorHandler(error, res);
   }
 };

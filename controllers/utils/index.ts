@@ -2,6 +2,7 @@ import { Comments } from '../../database/models/comments';
 import { Users } from '../../database/models/users';
 import { Categories } from '../../database/models/categories';
 import { Ratings } from '../../database/models/ratings';
+import { Response } from 'express';
 
 const getJokeComments = async (jokeId: number) => {
   return await Promise.all(
@@ -51,4 +52,13 @@ const getCompleteJoke = async (jokeId: number, categoryId: number, userId: numbe
   };
 };
 
-export { getCompleteJoke, getJokeComments, getJokeCategory, getJokeRate, getJokeUser };
+const errorHandler = (err: Error, res: Response) => {
+  console.error(err);
+  if (err.name === 'ValidationError') {
+    res.status(400).json({ error: err.message });
+  } else {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+export { getCompleteJoke, getJokeComments, getJokeCategory, getJokeRate, getJokeUser, errorHandler };

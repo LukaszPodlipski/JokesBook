@@ -1,6 +1,10 @@
+import { Response } from 'express';
+import { IAuthenticatedRequest } from 'database/entities';
+import { errorHandler } from './utils';
+
 import { Users } from '../database/models/users';
 
-export const getUser = async (req, res) => {
+export const getUser = async (req: IAuthenticatedRequest, res: Response) => {
   const userId = req.user.id;
   try {
     const user = await Users.findOne({ where: { id: userId } });
@@ -10,7 +14,6 @@ export const getUser = async (req, res) => {
       res.status(404).json({ error: 'User not found' });
     }
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Internal server error' });
+    errorHandler(error, res);
   }
 };
