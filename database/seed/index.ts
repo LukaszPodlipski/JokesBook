@@ -6,31 +6,31 @@ import { Users, Jokes, Categories, Comments, Ratings } from '../associations';
 
 const seeds = [
   {
-    name: 'categories',
+    name: 'Categories',
     model: Categories,
     data: './database/seed/data/categories.csv',
     dataModel: (row) => new Category(row),
   },
   {
-    name: 'users',
+    name: 'Users',
     model: Users,
     data: './database/seed/data/users.csv',
     dataModel: (row) => new User(row),
   },
   {
-    name: 'jokes',
+    name: 'Jokes',
     model: Jokes,
     data: './database/seed/data/jokes.csv',
     dataModel: (row) => new Joke(row),
   },
   {
-    name: 'ratings',
+    name: 'Ratings',
     model: Ratings,
     data: './database/seed/data/ratings.csv',
     dataModel: (row) => new Rating(row),
   },
   {
-    name: 'comments',
+    name: 'Comments',
     model: Comments,
     data: './database/seed/data/comments.csv',
     dataModel: (row) => new Comment(row),
@@ -44,13 +44,16 @@ async function seedModel(seed) {
       seed.model.create(seed.dataModel(row));
     })
     .on('end', () => {
-      console.log(`${seed.name} file successfully processed`);
+      console.log(`[Database] ${seed.name} file successfully processed`);
     });
 }
 
 export async function seedDatabase() {
   for (const seed of seeds) {
+    const tableName = seed.model.getTableName();
+    await sequelize.query(`ALTER TABLE "${tableName}" DISABLE TRIGGER ALL`); //  disables all triggers (including foreign key constraints) for the table being seeded
     await seedModel(seed);
+    await sequelize.query(`ALTER TABLE "${tableName}" ENABLE TRIGGER ALL`);
   }
 }
 
@@ -58,7 +61,7 @@ export const dropDatabase = async () => {
   try {
     await sequelize.query('DROP SCHEMA public CASCADE;');
     await sequelize.query('CREATE SCHEMA public;');
-    console.log('Schema dropped and created successfully');
+    console.log('[Database] Schema dropped and created successfully');
   } catch (error) {
     console.error(error);
   }

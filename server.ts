@@ -40,7 +40,7 @@ export const startServer = ({ port, corsOptions, limiter }: TServerConfig) => {
 
   // Start the server
   app.listen(port, async () => {
-    console.log('JokesBook app listening on port 3000!');
+    console.log('[Server] JokesBook app listening on port 3000!');
     await dropDatabase();
     await sequelize.sync();
     await seedDatabase();
