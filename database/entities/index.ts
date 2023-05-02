@@ -12,6 +12,11 @@ export interface IUnAuthenticatedRequest<T> extends Request {
   body: T;
 }
 
+export interface ILoginPayload {
+  email: string;
+  password: string;
+}
+
 interface IColumn {
   createdAt?: Date;
   updatedAt?: Date;

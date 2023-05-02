@@ -9,13 +9,13 @@ import {
   updateJokeBodySchema,
 } from './validatorsSchemas';
 
-import { getCompleteJoke, errorHandler } from './utils';
-import sequelize from '../database';
-import { Joke, Rating, Comment } from '../database/entities/index';
+import { getCompleteJoke, getRandomJokeUtil, errorHandler } from './utils';
+import { Joke, Rating, Comment, IJoke } from '../database/entities/index';
 import { Jokes } from '../database/models/jokes';
 import { Comments } from '../database/models/comments';
 import { Ratings } from '../database/models/ratings';
 
+/* -------------------------------- GET ALL JOKES --------------------------------- */
 export const getAllJokes = async (req: Request, res: Response) => {
   try {
     const jokes = await Jokes.findAll();
@@ -32,18 +32,24 @@ export const getAllJokes = async (req: Request, res: Response) => {
   }
 };
 
+/* --------------------------------- GET RANDOM JOKE ------------------------------- */
 export const getRandomJoke = async (req: Request, res: Response) => {
   try {
-    const { id, categoryId, userId, content } = await Jokes.findOne({
-      order: [[sequelize.fn('RANDOM')]],
-    } as unknown);
-    const joke = await getCompleteJoke(id, categoryId, userId, content);
-    res.status(200).json(joke);
+    const randomJoke = (await getRandomJokeUtil()) as IJoke;
+
+    if (randomJoke) {
+      const { id, categoryId, userId, content } = randomJoke;
+      const joke = await getCompleteJoke(id, categoryId, userId, content);
+      res.status(200).json(joke);
+    } else {
+      res.status(404).json({ error: 'There are no jokes' });
+    }
   } catch (error) {
     errorHandler(error, res);
   }
 };
 
+/* -------------------------------- GET SPECIFIC JOKE ------------------------------- */
 export const getSpecificJoke = async (req: Request & { params: ISpecificJokeParams }, res: Response) => {
   try {
     await specificJokeParamsSchema.validate(req.params);
@@ -63,30 +69,23 @@ export const getSpecificJoke = async (req: Request & { params: ISpecificJokePara
   }
 };
 
-export const deleteSpecificJoke = async (req: IAuthenticatedRequest & { params: ISpecificJokeParams }, res: Response) => {
+/* ------------------------------------- ADD JOKE ------------------------------------ */
+export const addJoke = async (req: IAuthReqTypedBody<{ content: string; categoryId: number }>, res: Response) => {
   try {
-    await specificJokeParamsSchema.validate(req.params);
+    await addJokeBodySchema.validate(req.body);
 
-    const { user } = req;
-    const { id } = req.params;
+    const { content, categoryId } = req.body;
+    const { id } = req.user;
 
-    const joke = await Jokes.findOne({ where: { id } });
-
-    if (!joke) {
-      res.status(404).json({ error: 'Joke not found' });
-    } else if (joke?.userId !== user?.id) {
-      res.status(403).json({
-        error: "User doesn't have permission to delete this joke",
-      });
-    } else {
-      await Jokes.destroy({ where: { id } });
-      res.status(200).json({ message: 'Joke deleted succesfully' });
-    }
+    const newJoke = new Joke({ content, categoryId, userId: id });
+    await Jokes.create(newJoke);
+    res.status(201).json({ message: 'Joke added succesfully' });
   } catch (error) {
     errorHandler(error, res);
   }
 };
 
+/* -------------------------------- UPDATE SPECIFIC JOKE ------------------------------- */
 export const updateSpecificJoke = async (req: IAuthenticatedRequest & { params: ISpecificJokeParams }, res: Response) => {
   try {
     await specificJokeParamsSchema.validate(req.params);
@@ -112,21 +111,32 @@ export const updateSpecificJoke = async (req: IAuthenticatedRequest & { params: 
   }
 };
 
-export const addJoke = async (req: IAuthReqTypedBody<{ content: string; categoryId: number }>, res: Response) => {
+/* ------------------------------- DELETE SPECIFIC JOKE ------------------------------ */
+export const deleteSpecificJoke = async (req: IAuthenticatedRequest & { params: ISpecificJokeParams }, res: Response) => {
   try {
-    await addJokeBodySchema.validate(req.body);
+    await specificJokeParamsSchema.validate(req.params);
 
-    const { content, categoryId } = req.body;
-    const { id } = req.user;
+    const { user } = req;
+    const { id } = req.params;
 
-    const newJoke = new Joke({ content, categoryId, userId: id });
-    await Jokes.create(newJoke);
-    res.status(201).json({ message: 'Joke added succesfully' });
+    const joke = await Jokes.findOne({ where: { id } });
+
+    if (!joke) {
+      res.status(404).json({ error: 'Joke not found' });
+    } else if (joke?.userId !== user?.id) {
+      res.status(403).json({
+        error: "User doesn't have permission to delete this joke",
+      });
+    } else {
+      await Jokes.destroy({ where: { id } });
+      res.status(200).json({ message: 'Joke deleted succesfully' });
+    }
   } catch (error) {
     errorHandler(error, res);
   }
 };
 
+/* ------------------------------------- RATE JOKE ----------------------------------- */
 export const rateJoke = async (req: IAuthReqTypedBody<{ rate: number }> & { params: ISpecificJokeParams }, res: Response) => {
   try {
     await specificJokeParamsSchema.validate(req.params);
@@ -155,6 +165,7 @@ export const rateJoke = async (req: IAuthReqTypedBody<{ rate: number }> & { para
   }
 };
 
+/* ----------------------------------- COMMENT JOKE --------------------------------- */
 export const commentJoke = async (
   req: IAuthReqTypedBody<{ content: string }> & { params: ISpecificJokeParams },
   res: Response
@@ -166,8 +177,9 @@ export const commentJoke = async (
     const { user } = req;
     const id = req.params.id;
     const { content } = req.body;
-    if (!content) {
-      res.status(400).json({ error: 'No comment to add' });
+    const joke = await Jokes.findOne({ where: { id } });
+    if (!joke) {
+      res.status(404).json({ error: 'Joke not found' });
     } else {
       const newComment = new Comment({
         content,

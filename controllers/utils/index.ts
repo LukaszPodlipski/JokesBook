@@ -2,7 +2,9 @@ import { Comments } from '../../database/models/comments';
 import { Users } from '../../database/models/users';
 import { Categories } from '../../database/models/categories';
 import { Ratings } from '../../database/models/ratings';
+import { Jokes } from '../../database/models/jokes';
 import { Response } from 'express';
+import sequelize from '../../database';
 
 const getJokeComments = async (jokeId: number) => {
   return await Promise.all(
@@ -52,8 +54,16 @@ const getCompleteJoke = async (jokeId: number, categoryId: number, userId: numbe
   };
 };
 
+const getRandomJokeUtil = async () => {
+  return await Jokes.findOne({
+    order: [[sequelize.fn('RANDOM')]],
+  } as unknown);
+};
+
 const errorHandler = (err: Error, res: Response) => {
-  console.error(err);
+  const isTest = process.env.NODE_ENV === 'test';
+  if (!isTest) console.log(err);
+
   if (err.name === 'ValidationError') {
     res.status(400).json({ error: err.message });
   } else {
@@ -61,4 +71,4 @@ const errorHandler = (err: Error, res: Response) => {
   }
 };
 
-export { getCompleteJoke, getJokeComments, getJokeCategory, getJokeRate, getJokeUser, errorHandler };
+export { getCompleteJoke, getRandomJokeUtil, getJokeComments, getJokeCategory, getJokeRate, getJokeUser, errorHandler };

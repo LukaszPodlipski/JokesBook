@@ -20,9 +20,13 @@ export type TServerConfig = {
   };
 };
 
-export const startServer = ({ port, corsOptions, limiter }: TServerConfig) => {
-  const app: Application = express();
+type DatabaseConfig = { dropDb: boolean; seedDb: boolean };
 
+const app: Application = express();
+
+let _server: any = null;
+
+const startServer = async ({ port, corsOptions, limiter }: TServerConfig, { dropDb, seedDb }: DatabaseConfig) => {
   // Security
   app.use(helmet());
   app.use(cors(corsOptions));
@@ -39,10 +43,24 @@ export const startServer = ({ port, corsOptions, limiter }: TServerConfig) => {
   app.use('/users', usersRouter);
 
   // Start the server
-  app.listen(port, async () => {
-    console.log('[Server] JokesBook app listening on port 3000!');
-    await dropDatabase();
-    await sequelize.sync();
-    await seedDatabase();
+  await new Promise<void>((resolve, reject) => {
+    _server = app
+      .listen(port, async () => {
+        console.log('[Server] JokesBook app listening on port 3000!');
+        if (dropDb) await dropDatabase();
+        await sequelize.sync();
+        if (seedDb) await seedDatabase();
+        resolve();
+      })
+      .on('error', (error: Error) => {
+        reject(error);
+      });
   });
 };
+
+const stopServer = async () => {
+  await _server.close();
+  console.log('[Server] JokesBook app stopped!');
+};
+
+export { startServer, stopServer, app };
