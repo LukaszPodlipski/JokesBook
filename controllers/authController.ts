@@ -2,17 +2,26 @@ import jwt from 'jsonwebtoken';
 import { Users } from '../database/models/users';
 import { Response } from 'express';
 import { errorHandler } from './utils';
-import { IUnAuthenticatedRequest } from 'database/entities';
+import { IUnAuthenticatedRequest, IUser, ILoginPayload } from 'database/entities';
 import { loginSchema } from './validatorsSchemas';
 const secretKey = process.env.SECRET_KEY;
 
+export const getValidatedUser = async (payload: ILoginPayload): Promise<IUser> => {
+  await loginSchema.validate(payload);
+  const { email, password } = payload;
+  const user = await Users.findOne({ where: { email } });
+  if (!user || user.password !== password) {
+    throw null;
+  } else {
+    return user;
+  }
+};
+
 export const login = async (req: IUnAuthenticatedRequest<{ email: string; password: string }>, res: Response) => {
   try {
-    await loginSchema.validate(req.body);
-    const { email, password } = req.body;
-    const user = await Users.findOne({ where: { email } });
+    const user: IUser = await getValidatedUser(req.body);
 
-    if (!user || user.password !== password) {
+    if (!user) {
       return res.status(401).json({ error: 'Invalid email or password' });
     }
 
