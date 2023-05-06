@@ -7,6 +7,7 @@ import { Jokes } from '../database/models/jokes';
 import { Categories } from '../database/models/categories';
 import { getValidatedUser } from '../controllers/authController';
 import { getRandomJokeUtil } from '../controllers/utils';
+import { StatusCodes } from 'http-status-codes';
 
 const secretKey = process.env.SECRET_KEY;
 
@@ -118,7 +119,7 @@ const getCommentExampleBody = async (valid = true) => {
 describe('[JOKES ENDPOINTS] GET ALL JOKES [/jokes] - success', () => {
   it('Test should successfully return all jokes', async () => {
     const res = await request(app).get('/jokes');
-    expect(res.statusCode).toBe(200);
+    expect(res.statusCode).toBe(StatusCodes.OK);
     expect(res.body.length).toBeGreaterThan(0);
   });
 });
@@ -127,7 +128,7 @@ describe('[JOKES ENDPOINTS] GET ALL JOKES [/jokes] - success', () => {
 describe('[JOKES ENDPOINTS] GET RANDOM JOKE [/jokes/random] - success', () => {
   it('Test should successfully return random joke', async () => {
     const res = await request(app).get('/jokes/random');
-    expect(res.statusCode).toBe(200);
+    expect(res.statusCode).toBe(StatusCodes.OK);
     expect(Object.keys(res.body).length).toBeGreaterThan(0);
   });
 });
@@ -137,7 +138,7 @@ describe('[JOKES ENDPOINTS] GET SPECIFIC JOKE [/jokes/specific/:id] - success', 
   it('Test should succesfully return specific joke', async () => {
     const jokeId = await getExistingJokeId();
     const res = await request(app).get(`/jokes/specific/${jokeId}`);
-    expect(res.statusCode).toBe(200);
+    expect(res.statusCode).toBe(StatusCodes.OK);
     expect(Object.keys(res.body).length).toBeGreaterThan(0);
   });
 });
@@ -146,7 +147,7 @@ describe('[JOKES ENDPOINTS] GET SPECIFIC JOKE [/jokes/specific/:id] - not found'
   it('Test should fail, because of not existing ID', async () => {
     const nonExistingId = await getNotExistingJokeId();
     const res = await request(app).get(`/jokes/specific/${nonExistingId}`);
-    expect(res.statusCode).toBe(404);
+    expect(res.statusCode).toBe(StatusCodes.NOT_FOUND);
   });
 });
 
@@ -154,7 +155,7 @@ describe('[JOKES ENDPOINTS] GET SPECIFIC JOKE [/jokes/specific/:id] - invalid pa
   it('Test should fail, becouse of invalid params schema', async () => {
     const invalidParamId = 'invalidId';
     const res = await request(app).get(`/jokes/specific/${invalidParamId}`);
-    expect(res.statusCode).toBe(400);
+    expect(res.statusCode).toBe(StatusCodes.BAD_REQUEST);
   });
 });
 /* ------------------------------------- ADD JOKE ------------------------------------ */
@@ -164,7 +165,7 @@ describe('[JOKES ENDPOINTS] ADD JOKE [/jokes/add] - success', () => {
     const { token } = await getValidUserAndToken();
     const payload = await getJokeExampleBody();
     const res = await request(app).post('/jokes/add').set('Authorization', token).send(payload.body);
-    expect(res.statusCode).toBe(201);
+    expect(res.statusCode).toBe(StatusCodes.CREATED);
   });
 });
 
@@ -173,7 +174,7 @@ describe('[JOKES ENDPOINTS] ADD JOKE [/jokes/add] - unauthorized', () => {
     const invalidToken = 'invalid-token';
     const payload = await getJokeExampleBody();
     const res = await request(app).post('/jokes/add').set('Authorization', invalidToken).send(payload.body);
-    expect(res.statusCode).toBe(401);
+    expect(res.statusCode).toBe(StatusCodes.UNAUTHORIZED);
   });
 });
 
@@ -182,7 +183,7 @@ describe('[JOKES ENDPOINTS] ADD JOKE [/jokes/add] - invalid body schema', () => 
     const { token } = await getValidUserAndToken();
     const payload = await getJokeExampleBody(false);
     const res = await request(app).post('/jokes/add').set('Authorization', token).send(payload.body);
-    expect(res.statusCode).toBe(400);
+    expect(res.statusCode).toBe(StatusCodes.BAD_REQUEST);
   });
 });
 /* -------------------------------- UPDATE SPECIFIC JOKE ------------------------------- */
@@ -192,7 +193,7 @@ describe('[JOKES ENDPOINTS] UPDATE SPECIFIC JOKE [/jokes/specific/:id] - success
     const payload = await getJokeExampleBody();
     const jokeId = await getUserJokeId(user.id);
     const res = await request(app).patch(`/jokes/specific/${jokeId}`).set('Authorization', token).send(payload.body);
-    expect(res.statusCode).toBe(200);
+    expect(res.statusCode).toBe(StatusCodes.OK);
   });
 });
 
@@ -202,7 +203,7 @@ describe('[JOKES ENDPOINTS] UPDATE SPECIFIC JOKE [/jokes/specific/:id] - not fou
     const payload = await getJokeExampleBody();
     const jokeId = await getNotExistingJokeId();
     const res = await request(app).patch(`/jokes/specific/${jokeId}`).set('Authorization', token).send(payload.body);
-    expect(res.statusCode).toBe(404);
+    expect(res.statusCode).toBe(StatusCodes.NOT_FOUND);
   });
 });
 
@@ -212,7 +213,7 @@ describe('[JOKES ENDPOINTS] UPDATE SPECIFIC JOKE [/jokes/specific/:id] - no perm
     const payload = await getJokeExampleBody();
     const jokeId = await getNotUserJokeId(user.id);
     const res = await request(app).patch(`/jokes/specific/${jokeId}`).set('Authorization', token).send(payload.body);
-    expect(res.statusCode).toBe(403);
+    expect(res.statusCode).toBe(StatusCodes.FORBIDDEN);
   });
 });
 
@@ -223,7 +224,7 @@ describe('[JOKES ENDPOINTS] UPDATE SPECIFIC JOKE [/jokes/specific/:id] - unautho
     const payload = await getJokeExampleBody();
     const jokeId = await getNotUserJokeId(user.id);
     const res = await request(app).patch(`/jokes/specific/${jokeId}`).set('Authorization', invalidToken).send(payload.body);
-    expect(res.statusCode).toBe(401);
+    expect(res.statusCode).toBe(StatusCodes.UNAUTHORIZED);
   });
 });
 
@@ -233,7 +234,7 @@ describe('[JOKES ENDPOINTS] UPDATE SPECIFIC JOKE [/jokes/specific/:id] - invalid
     const payload = await getJokeExampleBody(false);
     const jokeId = await getUserJokeId(user.id);
     const res = await request(app).patch(`/jokes/specific/${jokeId}`).set('Authorization', token).send(payload.body);
-    expect(res.statusCode).toBe(400);
+    expect(res.statusCode).toBe(StatusCodes.BAD_REQUEST);
   });
 });
 
@@ -244,7 +245,7 @@ describe('[JOKES ENDPOINTS] RATE JOKE [/jokes/rate/:id] - success', () => {
     const { user, token } = await getValidUserAndToken();
     const jokeId = await getNotUserJokeId(user.id);
     const res = await request(app).post(`/jokes/rate/${jokeId}`).set('Authorization', token).send(payload.body);
-    expect(res.statusCode).toBe(201);
+    expect(res.statusCode).toBe(StatusCodes.CREATED);
   });
 });
 
@@ -254,7 +255,7 @@ describe('[JOKES ENDPOINTS] RATE JOKE [/jokes/rate/:id] - not found', () => {
     const { token } = await getValidUserAndToken();
     const jokeId = await getNotExistingJokeId();
     const res = await request(app).post(`/jokes/rate/${jokeId}`).set('Authorization', token).send(payload.body);
-    expect(res.statusCode).toBe(404);
+    expect(res.statusCode).toBe(StatusCodes.NOT_FOUND);
   });
 });
 
@@ -264,7 +265,7 @@ describe('[JOKES ENDPOINTS] RATE JOKE [/jokes/rate/:id] - no permissions', () =>
     const { user, token } = await getValidUserAndToken();
     const jokeId = await getUserJokeId(user.id);
     const res = await request(app).post(`/jokes/rate/${jokeId}`).set('Authorization', token).send(payload.body);
-    expect(res.statusCode).toBe(403);
+    expect(res.statusCode).toBe(StatusCodes.FORBIDDEN);
   });
 });
 
@@ -275,7 +276,7 @@ describe('[JOKES ENDPOINTS] RATE JOKE [/jokes/rate/:id] - unauthorized', () => {
     const { user } = await getValidUserAndToken();
     const jokeId = await getUserJokeId(user.id);
     const res = await request(app).post(`/jokes/rate/${jokeId}`).set('Authorization', invalidToken).send(payload.body);
-    expect(res.statusCode).toBe(401);
+    expect(res.statusCode).toBe(StatusCodes.UNAUTHORIZED);
   });
 });
 
@@ -285,7 +286,7 @@ describe('[JOKES ENDPOINTS] RATE JOKE [/jokes/rate/:id] - invalid body schema', 
     const { user, token } = await getValidUserAndToken();
     const jokeId = await getNotUserJokeId(user.id);
     const res = await request(app).post(`/jokes/rate/${jokeId}`).set('Authorization', token).send(payload.body);
-    expect(res.statusCode).toBe(400);
+    expect(res.statusCode).toBe(StatusCodes.BAD_REQUEST);
   });
 });
 
@@ -295,7 +296,7 @@ describe('[JOKES ENDPOINTS] RATE JOKE [/jokes/rate/:id] - invalid params schema'
     const { token } = await getValidUserAndToken();
     const jokeId = 'invalid-joke-id';
     const res = await request(app).post(`/jokes/rate/${jokeId}`).set('Authorization', token).send(payload.body);
-    expect(res.statusCode).toBe(400);
+    expect(res.statusCode).toBe(StatusCodes.BAD_REQUEST);
   });
 });
 
@@ -306,7 +307,7 @@ describe('[JOKES ENDPOINTS] COMMENT JOKE [/jokes/comment/:id] - success', () => 
     const { token } = await getValidUserAndToken();
     const jokeId = await getExistingJokeId();
     const res = await request(app).post(`/jokes/comment/${jokeId}`).set('Authorization', token).send(payload.body);
-    expect(res.statusCode).toBe(201);
+    expect(res.statusCode).toBe(StatusCodes.CREATED);
   });
 });
 
@@ -316,7 +317,7 @@ describe('[JOKES ENDPOINTS] COMMENT JOKE [/jokes/comment/:id] - not found', () =
     const { token } = await getValidUserAndToken();
     const jokeId = await getNotExistingJokeId();
     const res = await request(app).post(`/jokes/comment/${jokeId}`).set('Authorization', token).send(payload.body);
-    expect(res.statusCode).toBe(404);
+    expect(res.statusCode).toBe(StatusCodes.NOT_FOUND);
   });
 });
 
@@ -326,7 +327,7 @@ describe('[JOKES ENDPOINTS] COMMENT JOKE [/jokes/comment/:id] - unauthorized', (
     const invalidToken = 'invalid-token';
     const jokeId = await getExistingJokeId();
     const res = await request(app).post(`/jokes/comment/${jokeId}`).set('Authorization', invalidToken).send(payload.body);
-    expect(res.statusCode).toBe(401);
+    expect(res.statusCode).toBe(StatusCodes.UNAUTHORIZED);
   });
 });
 
@@ -336,7 +337,7 @@ describe('[JOKES ENDPOINTS] COMMENT JOKE [/jokes/comment/:id] - invalid body sch
     const { token } = await getValidUserAndToken();
     const jokeId = await getExistingJokeId();
     const res = await request(app).post(`/jokes/comment/${jokeId}`).set('Authorization', token).send(payload.body);
-    expect(res.statusCode).toBe(400);
+    expect(res.statusCode).toBe(StatusCodes.BAD_REQUEST);
   });
 });
 
@@ -346,7 +347,7 @@ describe('[JOKES ENDPOINTS] COMMENT JOKE [/jokes/comment/:id] - invalid params s
     const { token } = await getValidUserAndToken();
     const jokeId = 'invalid-joke-id';
     const res = await request(app).post(`/jokes/comment/${jokeId}`).set('Authorization', token).send(payload.body);
-    expect(res.statusCode).toBe(400);
+    expect(res.statusCode).toBe(StatusCodes.BAD_REQUEST);
   });
 });
 
@@ -356,7 +357,7 @@ describe('[JOKES ENDPOINTS] DELETE SPECIFIC JOKE [/jokes/specific/:id] - success
     const { user, token } = await getValidUserAndToken();
     const jokeId = await getUserJokeId(user.id);
     const res = await request(app).delete(`/jokes/specific/${jokeId}`).set('Authorization', token);
-    expect(res.statusCode).toBe(200);
+    expect(res.statusCode).toBe(StatusCodes.OK);
   });
 });
 
@@ -365,7 +366,7 @@ describe('[JOKES ENDPOINTS] DELETE SPECIFIC JOKE [/jokes/specific/:id] - not fou
     const { token } = await getValidUserAndToken();
     const jokeId = await getNotExistingJokeId();
     const res = await request(app).delete(`/jokes/specific/${jokeId}`).set('Authorization', token);
-    expect(res.statusCode).toBe(404);
+    expect(res.statusCode).toBe(StatusCodes.NOT_FOUND);
   });
 });
 
@@ -374,7 +375,7 @@ describe('[JOKES ENDPOINTS] DELETE SPECIFIC JOKE [/jokes/specific/:id] - no perm
     const { user, token } = await getValidUserAndToken();
     const jokeId = await getNotUserJokeId(user.id);
     const res = await request(app).delete(`/jokes/specific/${jokeId}`).set('Authorization', token);
-    expect(res.statusCode).toBe(403);
+    expect(res.statusCode).toBe(StatusCodes.FORBIDDEN);
   });
 });
 
@@ -382,7 +383,7 @@ describe('[JOKES ENDPOINTS] DELETE SPECIFIC JOKE [/jokes/specific/:id] - unautho
   it('Test should fail, because of unauthorized user', async () => {
     const invalidToken = 'invalid-token';
     const res = await request(app).delete('/jokes/specific/1').set('Authorization', invalidToken);
-    expect(res.statusCode).toBe(401);
+    expect(res.statusCode).toBe(StatusCodes.UNAUTHORIZED);
   });
 });
 
@@ -391,7 +392,7 @@ describe('[JOKES ENDPOINTS] DELETE SPECIFIC JOKE [/jokes/specific/:id] - invalid
     const { token } = await getValidUserAndToken();
     const jokeId = 'invalid-id';
     const res = await request(app).delete(`/jokes/specific/${jokeId}`).set('Authorization', token);
-    expect(res.statusCode).toBe(400);
+    expect(res.statusCode).toBe(StatusCodes.BAD_REQUEST);
   });
 });
 

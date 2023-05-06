@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { IAuthenticatedRequest, ISpecificJokeParams, IAuthReqTypedBody } from 'database/entities';
+import { StatusCodes } from 'http-status-codes';
 
 import {
   specificJokeParamsSchema,
@@ -26,7 +27,7 @@ export const getAllJokes = async (req: Request, res: Response) => {
       })
     );
 
-    res.status(200).json(transformedJokes);
+    res.status(StatusCodes.OK).json(transformedJokes);
   } catch (error) {
     errorHandler(error, res);
   }
@@ -40,9 +41,9 @@ export const getRandomJoke = async (req: Request, res: Response) => {
     if (randomJoke) {
       const { id, categoryId, userId, content } = randomJoke;
       const joke = await getCompleteJoke(id, categoryId, userId, content);
-      res.status(200).json(joke);
+      res.status(StatusCodes.OK).json(joke);
     } else {
-      res.status(404).json({ error: 'There are no jokes' });
+      res.status(StatusCodes.NOT_FOUND).json({ error: 'There are no jokes' });
     }
   } catch (error) {
     errorHandler(error, res);
@@ -60,9 +61,9 @@ export const getSpecificJoke = async (req: Request & { params: ISpecificJokePara
     if (joke) {
       const { categoryId, userId, content } = joke;
       const newJoke = await getCompleteJoke(id, categoryId, userId, content);
-      res.status(200).json(newJoke);
+      res.status(StatusCodes.OK).json(newJoke);
     } else {
-      res.status(404).json({ error: 'Joke not found' });
+      res.status(StatusCodes.NOT_FOUND).json({ error: 'Joke not found' });
     }
   } catch (error) {
     errorHandler(error, res);
@@ -79,7 +80,7 @@ export const addJoke = async (req: IAuthReqTypedBody<{ content: string; category
 
     const newJoke = new Joke({ content, categoryId, userId: id });
     await Jokes.create(newJoke);
-    res.status(201).json({ message: 'Joke added succesfully' });
+    res.status(StatusCodes.CREATED).json({ message: 'Joke added succesfully' });
   } catch (error) {
     errorHandler(error, res);
   }
@@ -97,14 +98,14 @@ export const updateSpecificJoke = async (req: IAuthenticatedRequest & { params: 
     const joke = await Jokes.findOne({ where: { id } });
 
     if (!joke) {
-      res.status(404).json({ error: 'Joke not found' });
+      res.status(StatusCodes.NOT_FOUND).json({ error: 'Joke not found' });
     } else if (joke?.userId !== user?.id) {
-      res.status(403).json({
+      res.status(StatusCodes.FORBIDDEN).json({
         error: "User doesn't have permission to update this joke",
       });
     } else {
       await Jokes.update({ ...req.body }, { where: { id } });
-      res.status(200).json({ message: 'Joke updated succesfully' });
+      res.status(StatusCodes.OK).json({ message: 'Joke updated succesfully' });
     }
   } catch (error) {
     errorHandler(error, res);
@@ -122,14 +123,14 @@ export const deleteSpecificJoke = async (req: IAuthenticatedRequest & { params: 
     const joke = await Jokes.findOne({ where: { id } });
 
     if (!joke) {
-      res.status(404).json({ error: 'Joke not found' });
+      res.status(StatusCodes.NOT_FOUND).json({ error: 'Joke not found' });
     } else if (joke?.userId !== user?.id) {
-      res.status(403).json({
+      res.status(StatusCodes.FORBIDDEN).json({
         error: "User doesn't have permission to delete this joke",
       });
     } else {
       await Jokes.destroy({ where: { id } });
-      res.status(200).json({ message: 'Joke deleted succesfully' });
+      res.status(StatusCodes.OK).json({ message: 'Joke deleted succesfully' });
     }
   } catch (error) {
     errorHandler(error, res);
@@ -148,9 +149,9 @@ export const rateJoke = async (req: IAuthReqTypedBody<{ rate: number }> & { para
     const joke = await Jokes.findOne({ where: { id } });
 
     if (!joke) {
-      res.status(404).json({ error: `Joke with id ${id} not found` });
+      res.status(StatusCodes.NOT_FOUND).json({ error: `Joke with id ${id} not found` });
     } else if (user?.id === joke?.userId) {
-      res.status(403).json({ error: "You can't rate your own joke" });
+      res.status(StatusCodes.FORBIDDEN).json({ error: "You can't rate your own joke" });
     } else {
       const newRating = new Rating({
         rate,
@@ -158,7 +159,7 @@ export const rateJoke = async (req: IAuthReqTypedBody<{ rate: number }> & { para
         jokeId: id,
       });
       await Ratings.create(newRating);
-      res.status(201).json({ message: 'Rating added succesfully' });
+      res.status(StatusCodes.CREATED).json({ message: 'Rating added succesfully' });
     }
   } catch (error) {
     errorHandler(error, res);
@@ -179,7 +180,7 @@ export const commentJoke = async (
     const { content } = req.body;
     const joke = await Jokes.findOne({ where: { id } });
     if (!joke) {
-      res.status(404).json({ error: 'Joke not found' });
+      res.status(StatusCodes.NOT_FOUND).json({ error: 'Joke not found' });
     } else {
       const newComment = new Comment({
         content,
@@ -187,7 +188,7 @@ export const commentJoke = async (
         jokeId: id,
       });
       await Comments.create(newComment);
-      res.status(201).json({ message: 'Comment added succesfully' });
+      res.status(StatusCodes.CREATED).json({ message: 'Comment added succesfully' });
     }
   } catch (error) {
     errorHandler(error, res);

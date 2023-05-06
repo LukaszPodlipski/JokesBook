@@ -1,6 +1,7 @@
 import { Response } from 'express';
 import { IAuthenticatedRequest } from 'database/entities';
 import { errorHandler } from './utils';
+import { StatusCodes } from 'http-status-codes';
 
 import { Users } from '../database/models/users';
 
@@ -11,7 +12,7 @@ export const getUser = async (req: IAuthenticatedRequest, res: Response) => {
     if (user) {
       res.json(user);
     } else {
-      res.status(404).json({ error: 'User not found' });
+      res.status(StatusCodes.NOT_FOUND).json({ error: 'User not found' });
     }
   } catch (error) {
     errorHandler(error, res);
