@@ -5,6 +5,7 @@ import { Ratings } from '../../database/models/ratings';
 import { Jokes } from '../../database/models/jokes';
 import { Response } from 'express';
 import sequelize from '../../database';
+import { StatusCodes } from 'http-status-codes';
 
 const getJokeComments = async (jokeId: number) => {
   return await Promise.all(
@@ -65,9 +66,9 @@ const errorHandler = (err: Error, res: Response) => {
   if (!isTest) console.log(err);
 
   if (err.name === 'ValidationError') {
-    res.status(400).json({ error: err.message });
+    res.status(StatusCodes.BAD_REQUEST).json({ error: err.message });
   } else {
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: 'Internal server error' });
   }
 };
 

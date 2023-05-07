@@ -4,6 +4,8 @@ import { Response } from 'express';
 import { errorHandler } from './utils';
 import { IUnAuthenticatedRequest, IUser, ILoginPayload } from 'database/entities';
 import { loginSchema } from './validatorsSchemas';
+import { StatusCodes } from 'http-status-codes';
+
 const secretKey = process.env.SECRET_KEY;
 
 export const getValidatedUser = async (payload: ILoginPayload): Promise<IUser> => {
@@ -22,7 +24,7 @@ export const login = async (req: IUnAuthenticatedRequest<{ email: string; passwo
     const user: IUser = await getValidatedUser(req.body);
 
     if (!user) {
-      return res.status(401).json({ error: 'Invalid email or password' });
+      return res.status(StatusCodes.UNAUTHORIZED).json({ error: 'Invalid email or password' });
     }
 
     // Generate JWT token
