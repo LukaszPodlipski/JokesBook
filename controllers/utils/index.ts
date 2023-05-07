@@ -6,6 +6,37 @@ import { Jokes } from '../../database/models/jokes';
 import { Response } from 'express';
 import sequelize from '../../database';
 import { StatusCodes } from 'http-status-codes';
+import bcrypt from 'bcryptjs';
+
+const hashPassword = (password: string) => {
+  return new Promise((resolve, reject) => {
+    bcrypt.genSalt(10, (err, salt) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+      bcrypt.hash(password, salt, (err, hash) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+        resolve(hash);
+      });
+    });
+  });
+};
+
+const verifyPassword = (password: string, hash: string) => {
+  return new Promise((resolve, reject) => {
+    bcrypt.compare(password, hash, (err, result) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+      resolve(result);
+    });
+  });
+};
 
 const getJokeComments = async (jokeId: number) => {
   return await Promise.all(
@@ -72,4 +103,14 @@ const errorHandler = (err: Error, res: Response) => {
   }
 };
 
-export { getCompleteJoke, getRandomJokeUtil, getJokeComments, getJokeCategory, getJokeRate, getJokeUser, errorHandler };
+export {
+  getCompleteJoke,
+  getRandomJokeUtil,
+  getJokeComments,
+  getJokeCategory,
+  getJokeRate,
+  getJokeUser,
+  errorHandler,
+  hashPassword,
+  verifyPassword,
+};

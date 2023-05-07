@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 import { Users } from '../database/models/users';
 import { Response } from 'express';
-import { errorHandler } from './utils';
+import { verifyPassword, errorHandler } from './utils';
 import { IUnAuthenticatedRequest, IUser, ILoginPayload } from 'database/entities';
 import { loginSchema } from './validatorsSchemas';
 import { StatusCodes } from 'http-status-codes';
@@ -12,7 +12,7 @@ export const getValidatedUser = async (payload: ILoginPayload): Promise<IUser> =
   await loginSchema.validate(payload);
   const { email, password } = payload;
   const user = await Users.findOne({ where: { email } });
-  if (!user || user.password !== password) {
+  if (!user || !verifyPassword(password, user.password)) {
     throw null;
   } else {
     return user;

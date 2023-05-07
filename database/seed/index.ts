@@ -3,6 +3,7 @@ import csv from 'csv-parser';
 import sequelize from '../index';
 import { User, Category, Joke, Comment, Rating } from '../entities/';
 import { Users, Jokes, Categories, Comments, Ratings } from '../associations';
+import { hashPassword } from '../../controllers/utils/index';
 
 const seeds = [
   {
@@ -40,8 +41,9 @@ const seeds = [
 async function seedModel(seed) {
   fs.createReadStream(seed.data)
     .pipe(csv())
-    .on('data', (row) => {
-      seed.model.create(seed.dataModel(row));
+    .on('data', async (row) => {
+      const data = row.password ? { ...row, password: await hashPassword(row.password) } : row;
+      seed.model.create(seed.dataModel(data));
     })
     .on('end', () => {
       console.log(`[Database] ${seed.name} file successfully processed`);
