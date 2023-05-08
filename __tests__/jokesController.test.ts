@@ -3,6 +3,7 @@ import { app } from '../server';
 import { startServer, stopServer } from '../server';
 import { config } from '../config';
 import { StatusCodes } from 'http-status-codes';
+
 import {
   getValidUserAndToken,
   getExistingJokeId,
@@ -23,6 +24,9 @@ beforeAll(async () => {
   await startServer(config.server, databaseConfig);
 });
 
+afterEach(() => {
+  jest.useRealTimers();
+});
 /* -------------------------------- JOKES ENDPOINTS ------------------------------- */
 
 /* -------------------------------- GET ALL JOKES --------------------------------- */

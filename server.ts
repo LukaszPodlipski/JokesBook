@@ -26,9 +26,8 @@ const app: Application = express();
 
 let _server: any = null;
 
-const isTest = process.env.NODE_ENV === 'test';
-
 const startServer = async ({ port, corsOptions, limiter }: TServerConfig, { dropDb, seedDb }: DatabaseConfig) => {
+  global.isTest = process.env.NODE_ENV === 'test';
   // Security
   app.use(helmet());
   app.use(cors(corsOptions));
@@ -48,7 +47,7 @@ const startServer = async ({ port, corsOptions, limiter }: TServerConfig, { drop
   await new Promise<void>((resolve, reject) => {
     _server = app
       .listen(port, async () => {
-        if (!isTest) console.log('[Server] JokesBook app listening on port 3000!');
+        if (!global.isTest) console.log('[Server] JokesBook app listening on port 3000!');
         if (dropDb) await dropDatabase();
         await sequelize.sync();
         if (seedDb) await seedDatabase();
@@ -56,13 +55,17 @@ const startServer = async ({ port, corsOptions, limiter }: TServerConfig, { drop
       })
       .on('error', (error: Error) => {
         reject(error);
+      })
+      .on('close', () => {
+        if (!global.isTest) console.log('[Server] JokesBook app closed!');
+        sequelize.close();
       });
   });
 };
 
 const stopServer = async () => {
   await _server.close();
-  if (!isTest) console.log('[Server] JokesBook app stopped!');
+  if (!global.isTest) console.log('[Server] JokesBook app stopped!');
 };
 
 export { startServer, stopServer, app };

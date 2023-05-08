@@ -13,6 +13,10 @@ beforeAll(async () => {
   await startServer(config.server, databaseConfig);
 });
 
+afterEach(() => {
+  jest.useRealTimers();
+});
+
 describe('[AUTH ENDPOINTS] Login [/login] - success', () => {
   it('Test should successfully login user', async () => {
     const payload = {
