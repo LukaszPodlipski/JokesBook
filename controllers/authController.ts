@@ -11,12 +11,14 @@ const secretKey = process.env.SECRET_KEY;
 export const getValidatedUser = async (payload: ILoginPayload): Promise<IUser> => {
   await loginSchema.validate(payload);
   const { email, password } = payload;
+
   const user = await Users.findOne({ where: { email } });
-  if (!user || !verifyPassword(password, user.password)) {
-    throw null;
-  } else {
-    return user;
-  }
+  if (!user) return null;
+
+  const validPassword = await verifyPassword(password, user.password);
+  if (!validPassword) return null;
+
+  return user;
 };
 
 export const login = async (req: IUnAuthenticatedRequest<{ email: string; password: string }>, res: Response) => {

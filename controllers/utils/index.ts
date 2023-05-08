@@ -96,7 +96,7 @@ const errorHandler = (err: Error, res: Response) => {
   const isTest = process.env.NODE_ENV === 'test';
   if (!isTest) console.log(err);
 
-  if (err.name === 'ValidationError') {
+  if (err?.name === 'ValidationError') {
     res.status(StatusCodes.BAD_REQUEST).json({ error: err.message });
   } else {
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: 'Internal server error' });

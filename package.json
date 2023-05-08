@@ -4,7 +4,7 @@
   "description": "App like kwejk but with joeks :)",
   "main": "index.js",
   "scripts": {
-    "test": "jest --detectOpenHandles",
+    "test": "jest --detectOpenHandles --runInBand",
     "start": "nodemon ./app.ts",
     "start:drop": "nodemon ./app.ts --drop",
     "start:seed": "nodemon ./app.ts --drop",
