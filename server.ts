@@ -55,10 +55,6 @@ const startServer = async ({ port, corsOptions, limiter }: TServerConfig, { drop
       })
       .on('error', (error: Error) => {
         reject(error);
-      })
-      .on('close', () => {
-        if (!global.isTest) console.log('[Server] JokesBook app closed!');
-        sequelize.close();
       });
   });
 };

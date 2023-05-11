@@ -24,9 +24,6 @@ beforeAll(async () => {
   await startServer(config.server, databaseConfig);
 });
 
-afterEach(() => {
-  jest.useRealTimers();
-});
 /* -------------------------------- JOKES ENDPOINTS ------------------------------- */
 
 /* -------------------------------- GET ALL JOKES --------------------------------- */
@@ -38,7 +35,7 @@ describe('[JOKES ENDPOINTS] GET ALL JOKES [/jokes] - success', () => {
   });
 });
 
-/* --------------------------------- GET RANDOM JOKE ------------------------------- */
+// /* --------------------------------- GET RANDOM JOKE ------------------------------- */
 describe('[JOKES ENDPOINTS] GET RANDOM JOKE [/jokes/random] - success', () => {
   it('Test should successfully return random joke', async () => {
     const res = await request(app).get('/jokes/random');
@@ -312,4 +309,5 @@ describe('[JOKES ENDPOINTS] DELETE SPECIFIC JOKE [/jokes/specific/:id] - invalid
 
 afterAll(async () => {
   await stopServer();
+  setTimeout(() => process.exit(), 1000);
 });

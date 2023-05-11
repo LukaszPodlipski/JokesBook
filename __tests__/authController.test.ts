@@ -13,10 +13,6 @@ beforeAll(async () => {
   await startServer(config.server, databaseConfig);
 });
 
-afterEach(() => {
-  jest.useRealTimers();
-});
-
 describe('[AUTH ENDPOINTS] Login [/login] - success', () => {
   it('Test should successfully login user', async () => {
     const payload = {
@@ -59,4 +55,5 @@ describe('[AUTH ENDPOINTS] Login [/login] - invalid body schema', () => {
 
 afterAll(async () => {
   await stopServer();
+  setTimeout(() => process.exit(), 1000);
 });

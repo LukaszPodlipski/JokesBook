@@ -14,10 +14,6 @@ beforeAll(async () => {
   await startServer(config.server, databaseConfig);
 });
 
-afterEach(() => {
-  jest.useRealTimers();
-});
-
 describe('[AUTH ENDPOINTS] Get user [/login] - success', () => {
   it('Test should successfully return logged user data', async () => {
     const { token } = await getValidUserAndToken();
@@ -38,4 +34,5 @@ describe('[AUTH ENDPOINTS] Get user [/login] - invalid token', () => {
 
 afterAll(async () => {
   await stopServer();
+  setTimeout(() => process.exit(), 1000);
 });
