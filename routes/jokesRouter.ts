@@ -12,6 +12,7 @@ import {
   updateSpecificJoke,
   rateJoke,
   commentJoke,
+  translateJoke,
 } from '../controllers/jokesController';
 
 router.get('/', getAllJokes);
@@ -29,5 +30,7 @@ router.patch('/specific/:id', authenticateToken, updateSpecificJoke);
 router.post('/rate/:id', authenticateToken, rateJoke);
 
 router.post('/comment/:id', authenticateToken, commentJoke);
+
+router.get('/translate/:id', authenticateToken, translateJoke);
 
 export default router;

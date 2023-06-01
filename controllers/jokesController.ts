@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import * as deepl from 'deepl-node';
 import { IAuthenticatedRequest, ISpecificJokeParams, IAuthReqTypedBody } from 'database/entities';
 import { StatusCodes } from 'http-status-codes';
 
@@ -8,6 +9,7 @@ import {
   commentJokeBodySchema,
   addJokeBodySchema,
   updateJokeBodySchema,
+  translateJokeBodySchema,
 } from './validatorsSchemas';
 
 import { getCompleteJoke, getRandomJokeUtil, errorHandler } from './utils';
@@ -15,6 +17,8 @@ import { Joke, Rating, Comment, IJoke } from '../database/entities/index';
 import { Jokes } from '../database/models/jokes';
 import { Comments } from '../database/models/comments';
 import { Ratings } from '../database/models/ratings';
+
+const translator = new deepl.Translator(process.env.DEEPL_API_SECRET);
 
 /* -------------------------------- GET ALL JOKES --------------------------------- */
 export const getAllJokes = async (req: Request, res: Response) => {
@@ -189,6 +193,44 @@ export const commentJoke = async (
       });
       await Comments.create(newComment);
       res.status(StatusCodes.CREATED).json({ message: 'Comment added succesfully' });
+    }
+  } catch (error) {
+    errorHandler(error, res);
+  }
+};
+
+/* ----------------------------------- TRANSLATE JOKE --------------------------------- */
+export const translateJoke = async (
+  req: IAuthReqTypedBody<{ lang: deepl.TargetLanguageCode }> & { params: ISpecificJokeParams },
+  res: Response
+) => {
+  try {
+    await specificJokeParamsSchema.validate(req.params);
+    await translateJokeBodySchema.validate(req.body);
+
+    const { id } = req.params;
+    const { lang } = req.body;
+
+    const joke = await Jokes.findOne({ where: { id } });
+
+    if (!joke) {
+      res.status(StatusCodes.NOT_FOUND).json({ error: 'Joke not found' });
+    } else {
+      await translator
+        .translateText(joke.content, null, lang)
+        .then((result) => {
+          const translatedJoke = { ...joke.dataValues, content: result.text };
+          res.status(StatusCodes.OK).json(translatedJoke);
+        })
+        .catch((error) => {
+          if (error.message.includes("'target_lang' not supported")) {
+            const err = new Error('Invalid target language');
+            err.name = 'ValidationError';
+            throw err;
+          } else {
+            throw error;
+          }
+        });
     }
   } catch (error) {
     errorHandler(error, res);

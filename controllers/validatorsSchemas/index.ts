@@ -32,3 +32,7 @@ export const loginSchema = yup.object().shape({
   email: yup.string().email().required('Email is required'),
   password: yup.string().required('Password is required'),
 });
+
+export const translateJokeBodySchema = yup.object().shape({
+  lang: yup.string().required('Lang is required'),
+});
