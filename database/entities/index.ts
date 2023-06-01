@@ -79,6 +79,20 @@ export class User implements IUser {
   }
 }
 
+type IUserClass = Omit<IUser, 'password'>;
+
+export class UserResponse implements IUserClass {
+  id: number;
+  name: string;
+  email: string;
+
+  constructor(data: IUserClass) {
+    this.id = data.id;
+    this.name = data.name;
+    this.email = data.email;
+  }
+}
+
 export class Category implements ICategory {
   name: string;
   id?: number;
