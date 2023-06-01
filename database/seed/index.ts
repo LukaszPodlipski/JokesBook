@@ -46,7 +46,7 @@ async function seedModel(seed) {
       seed.model.create(seed.dataModel(data));
     })
     .on('end', () => {
-      console.log(`[Database] ${seed.name} file successfully processed`);
+      if (!global.isTest) console.log(`[Database] ${seed.name} file successfully processed`);
     });
 }
 
@@ -63,7 +63,7 @@ export const dropDatabase = async () => {
   try {
     await sequelize.query('DROP SCHEMA public CASCADE;');
     await sequelize.query('CREATE SCHEMA public;');
-    console.log('[Database] Schema dropped and created successfully');
+    if (!global.isTest) console.log('[Database] Schema dropped and created successfully');
   } catch (error) {
     console.error(error);
   }
