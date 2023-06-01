@@ -309,5 +309,4 @@ describe('[JOKES ENDPOINTS] DELETE SPECIFIC JOKE [/jokes/specific/:id] - invalid
 
 afterAll(async () => {
   await stopServer();
-  setTimeout(() => process.exit(), 1000);
 });

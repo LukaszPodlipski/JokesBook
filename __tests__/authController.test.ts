@@ -55,5 +55,4 @@ describe('[AUTH ENDPOINTS] Login [/login] - invalid body schema', () => {
 
 afterAll(async () => {
   await stopServer();
-  setTimeout(() => process.exit(), 1000);
 });

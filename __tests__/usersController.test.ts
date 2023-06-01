@@ -34,5 +34,4 @@ describe('[AUTH ENDPOINTS] Get user [/login] - invalid token', () => {
 
 afterAll(async () => {
   await stopServer();
-  setTimeout(() => process.exit(), 1000);
 });
