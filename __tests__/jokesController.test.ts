@@ -307,6 +307,63 @@ describe('[JOKES ENDPOINTS] DELETE SPECIFIC JOKE [/jokes/specific/:id] - invalid
   });
 });
 
+/* ------------------------------- TRANSLATE JOKE ------------------------------ */
+describe('[JOKES ENDPOINTS] TRANSLATE JOKE [/jokes/TRANSLATE/:id] - success', () => {
+  it('Test should succesfully translate specific joke', async () => {
+    const { token } = await getValidUserAndToken();
+    const jokeId = await getExistingJokeId();
+    const payload = {
+      body: {
+        lang: 'it',
+      },
+    };
+    const res = await request(app).get(`/jokes/translate/${jokeId}`).set('Authorization', token).send(payload.body);
+    expect(res.statusCode).toBe(StatusCodes.OK);
+  });
+});
+
+describe('[JOKES ENDPOINTS] TRANSLATE JOKE [/jokes/TRANSLATE/:id] - not found', () => {
+  it('Test should fail, because of not found joke', async () => {
+    const { token } = await getValidUserAndToken();
+    const jokeId = await getNotExistingJokeId();
+    const payload = {
+      body: {
+        lang: 'it',
+      },
+    };
+    const res = await request(app).get(`/jokes/translate/${jokeId}`).set('Authorization', token).send(payload.body);
+    expect(res.statusCode).toBe(StatusCodes.NOT_FOUND);
+  });
+});
+
+describe('[JOKES ENDPOINTS] TRANSLATE JOKE [/jokes/TRANSLATE/:id] - unauthorized', () => {
+  it('Test should fail, because of unauthorized user', async () => {
+    const invalidToken = 'invalid-token';
+    const jokeId = await getExistingJokeId();
+    const payload = {
+      body: {
+        lang: 'it',
+      },
+    };
+    const res = await request(app).get(`/jokes/translate/${jokeId}`).set('Authorization', invalidToken).send(payload.body);
+    expect(res.statusCode).toBe(StatusCodes.UNAUTHORIZED);
+  });
+});
+
+describe('[JOKES ENDPOINTS] TRANSLATE JOKE [/jokes/TRANSLATE/:id] - invalid body schema', () => {
+  it('Test should fail, because of invalid body schema', async () => {
+    const { token } = await getValidUserAndToken();
+    const jokeId = await getExistingJokeId();
+    const payload = {
+      body: {
+        invalidLangParam: 'it',
+      },
+    };
+    const res = await request(app).get(`/jokes/translate/${jokeId}`).set('Authorization', token).send(payload.body);
+    expect(res.statusCode).toBe(StatusCodes.BAD_REQUEST);
+  });
+});
+
 afterAll(async () => {
   await stopServer();
 });
